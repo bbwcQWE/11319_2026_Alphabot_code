@@ -1,5 +1,5 @@
-// Copyright (c) 2021-2026 Littleton Robotics
-// http://github.com/Mechanical-Advantage
+// Copyright (c) 2025-2026 Team11319 Polaris
+// https://github.com/bbwcQWE
 //
 // Use of this source code is governed by a BSD
 // license that can be found in the LICENSE file
