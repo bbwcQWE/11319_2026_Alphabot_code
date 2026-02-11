@@ -258,8 +258,8 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * Sets all module orientations to the specified rotation.
-   * Useful for pre-orienting swerve modules before autonomous starts.
+   * Sets all module orientations to the specified rotation. Useful for pre-orienting swerve modules
+   * before autonomous starts.
    *
    * @param orientation The rotation to set all modules to
    */

@@ -29,9 +29,9 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
-import frc.robot.subsystems.vision.VisionConstants;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -92,13 +92,9 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVisionSim(
-                    VisionConstants.camera0Name,
-                    VisionConstants.robotToCamera0,
-                    drive::getPose),
+                    VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose),
                 new VisionIOPhotonVisionSim(
-                    VisionConstants.camera1Name,
-                    VisionConstants.robotToCamera1,
-                    drive::getPose));
+                    VisionConstants.camera1Name, VisionConstants.robotToCamera1, drive::getPose));
         break;
 
       default:
@@ -148,23 +144,17 @@ public class RobotContainer {
     configureButtonBindings();
   }
 
-  /**
-   * Configure BLine auto routines for the chooser
-   */
+  /** Configure BLine auto routines for the chooser */
   private void configureBLineAutoChooser() {
     // Example: Add a simple BLine path following auto
     autoChooser.addOption(
-        "BLine: Example Path",
-        BLineCommands.followPathFromFile(blinePathFollower, "example_a"));
-    
+        "BLine: Example Path", BLineCommands.followPathFromFile(blinePathFollower, "example_a"));
+
     // Example: Add a two-point path auto
     autoChooser.addOption(
         "BLine: Move to Position",
         BLineCommands.moveToPosition(
-            blinePathFollower,
-            drive,
-            new Translation2d(3.0, 3.0),
-            Rotation2d.kZero));
+            blinePathFollower, drive, new Translation2d(3.0, 3.0), Rotation2d.kZero));
   }
 
   /**
@@ -205,16 +195,14 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
-    
+
     // Y button: Follow example path
-    controller
-        .y()
-        .onTrue(BLineCommands.followPathFromFile(blinePathFollower, "example_a"));
+    controller.y().onTrue(BLineCommands.followPathFromFile(blinePathFollower, "example_a"));
   }
 
   /**
    * Get the BLinePathFollower subsystem
-   * 
+   *
    * @return BLinePathFollower instance
    */
   public BLinePathFollower getBLinePathFollower() {
@@ -223,7 +211,7 @@ public class RobotContainer {
 
   /**
    * Get the Drive subsystem
-   * 
+   *
    * @return Drive instance
    */
   public Drive getDrive() {
