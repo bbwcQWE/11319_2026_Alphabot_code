@@ -257,6 +257,22 @@ public class Drive extends SubsystemBase {
     stop();
   }
 
+  /**
+   * Sets all module orientations to the specified rotation.
+   * Useful for pre-orienting swerve modules before autonomous starts.
+   *
+   * @param orientation The rotation to set all modules to
+   */
+  public void setModuleOrientations(Rotation2d orientation) {
+    SwerveModuleState[] states = new SwerveModuleState[4];
+    for (int i = 0; i < 4; i++) {
+      states[i] = new SwerveModuleState(0.0, orientation);
+    }
+    for (int i = 0; i < 4; i++) {
+      modules[i].runSetpoint(states[i]);
+    }
+  }
+
   /** Returns a command to run a quasistatic test in the specified direction. */
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
     return run(() -> runCharacterization(0.0))
@@ -290,7 +306,7 @@ public class Drive extends SubsystemBase {
 
   /** Returns the measured chassis speeds of the robot. */
   @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
-  private ChassisSpeeds getChassisSpeeds() {
+  public ChassisSpeeds getChassisSpeeds() {
     return kinematics.toChassisSpeeds(getModuleStates());
   }
 

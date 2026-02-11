@@ -10,14 +10,18 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.BLineCommands;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
+import frc.robot.lib.BLine.*;
+import frc.robot.subsystems.bline.BLinePathFollower;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
@@ -34,12 +38,13 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
  * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
- * subsystems, commands, and button mappings) should be declared here.
+ * subsystems, OI devices, and button mappings) should be declared here.
  */
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Vision vision;
+  private final BLinePathFollower blinePathFollower;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -70,24 +75,6 @@ public class RobotContainer {
                     VisionConstants.camera0Name, VisionConstants.robotToCamera0),
                 new VisionIOPhotonVision(
                     VisionConstants.camera1Name, VisionConstants.robotToCamera1));
-
-        // The ModuleIOTalonFXS implementation provides an example implementation for
-        // TalonFXS controller connected to a CANdi with a PWM encoder. The
-        // implementations
-        // of ModuleIOTalonFX, ModuleIOTalonFXS, and ModuleIOSpark (from the Spark
-        // swerve
-        // template) can be freely intermixed to support alternative hardware
-        // arrangements.
-        // Please see the AdvantageKit template documentation for more information:
-        // https://docs.advantagekit.org/getting-started/template-projects/talonfx-swerve-template#custom-module-implementations
-        //
-        // drive =
-        // new Drive(
-        // new GyroIOPigeon2(),
-        // new ModuleIOTalonFXS(TunerConstants.FrontLeft),
-        // new ModuleIOTalonFXS(TunerConstants.FrontRight),
-        // new ModuleIOTalonFXS(TunerConstants.BackLeft),
-        // new ModuleIOTalonFXS(TunerConstants.BackRight));
         break;
 
       case SIM:
@@ -132,8 +119,14 @@ public class RobotContainer {
     // Register vision subsystem to enable periodic() calls
     vision.register();
 
+    // Initialize BLine Path Follower subsystem
+    blinePathFollower = new BLinePathFollower(drive);
+
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+
+    // Add BLine auto routines to chooser
+    configureBLineAutoChooser();
 
     // Set up SysId routines
     autoChooser.addOption(
@@ -153,6 +146,25 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+  }
+
+  /**
+   * Configure BLine auto routines for the chooser
+   */
+  private void configureBLineAutoChooser() {
+    // Example: Add a simple BLine path following auto
+    autoChooser.addOption(
+        "BLine: Example Path",
+        BLineCommands.followPathFromFile(blinePathFollower, "example_a"));
+    
+    // Example: Add a two-point path auto
+    autoChooser.addOption(
+        "BLine: Move to Position",
+        BLineCommands.moveToPosition(
+            blinePathFollower,
+            drive,
+            new Translation2d(3.0, 3.0),
+            Rotation2d.kZero));
   }
 
   /**
@@ -183,7 +195,7 @@ public class RobotContainer {
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // Reset gyro to 0° when B button is pressed
+    // Reset gyro to 0° when B button is pressed
     controller
         .b()
         .onTrue(
@@ -193,6 +205,29 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
+    
+    // Y button: Follow example path
+    controller
+        .y()
+        .onTrue(BLineCommands.followPathFromFile(blinePathFollower, "example_a"));
+  }
+
+  /**
+   * Get the BLinePathFollower subsystem
+   * 
+   * @return BLinePathFollower instance
+   */
+  public BLinePathFollower getBLinePathFollower() {
+    return blinePathFollower;
+  }
+
+  /**
+   * Get the Drive subsystem
+   * 
+   * @return Drive instance
+   */
+  public Drive getDrive() {
+    return drive;
   }
 
   /**
