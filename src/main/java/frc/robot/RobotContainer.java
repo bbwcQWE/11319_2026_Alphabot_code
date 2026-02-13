@@ -1,4 +1,7 @@
-// Copyright (c) 2021-2026 Littleton Robotics
+// Copyright (c) 2025-2026 11319 Polaris
+// https://github.com/bbwcQWE
+//
+// Based on Littleton Robotics AdvantageKit TalonFX(S) Swerve Template
 // http://github.com/Mechanical-Advantage
 //
 // Use of this source code is governed by a BSD
@@ -7,17 +10,15 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.commands.BLineCommands;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.lib.BLine.*;
@@ -118,11 +119,17 @@ public class RobotContainer {
     // Initialize BLine Path Follower subsystem
     blinePathFollower = new BLinePathFollower(drive);
 
-    // Set up auto routines
-    autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+    // Set up auto routines using PathPlanner
+    autoChooser = new LoggedDashboardChooser<>("Auto Choices");
 
-    // Add BLine auto routines to chooser
+    // 添加PathPlanner"None"选项作为默认（将回退到BLine检查）
+    autoChooser.addDefaultOption("None (Use BLine)", Commands.runOnce(drive::stop, drive));
+
+    // 配置BLine路径选择器
     configureBLineAutoChooser();
+
+    // 添加系统选择器（PathPlanner / BLine / None）
+    configureSystemChooser();
 
     // Set up SysId routines
     autoChooser.addOption(
@@ -144,17 +151,51 @@ public class RobotContainer {
     configureButtonBindings();
   }
 
+  /** BLine路径选择器 - 在dashboard上显示 */
+  private final SendableChooser<String> blinePathChooser = new SendableChooser<>();
+
   /** Configure BLine auto routines for the chooser */
   private void configureBLineAutoChooser() {
-    // Example: Add a simple BLine path following auto
-    autoChooser.addOption(
-        "BLine: Example Path", BLineCommands.followPathFromFile(blinePathFollower, "example_a"));
+    // 获取路径目录
+    java.io.File pathsDir = new java.io.File("src/main/deploy/autos/paths");
 
-    // Example: Add a two-point path auto
-    autoChooser.addOption(
-        "BLine: Move to Position",
-        BLineCommands.moveToPosition(
-            blinePathFollower, drive, new Translation2d(3.0, 3.0), Rotation2d.kZero));
+    // 添加默认选项
+    blinePathChooser.setDefaultOption("None", "");
+
+    if (pathsDir.exists() && pathsDir.isDirectory()) {
+      // 获取所有.json文件
+      java.io.File[] jsonFiles = pathsDir.listFiles((dir, name) -> name.endsWith(".json"));
+
+      if (jsonFiles != null) {
+        for (java.io.File file : jsonFiles) {
+          // 获取文件名（不含扩展名）
+          String pathName = file.getName().replace(".json", "");
+          blinePathChooser.addOption(pathName, pathName);
+        }
+      }
+    }
+
+    // 注册到NetworkTable使其显示在dashboard上
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putData(
+        "BLine Path Chooser", blinePathChooser);
+  }
+
+  /** 自动系统选择器 - 选择使用哪个系统 */
+  private final SendableChooser<String> systemChooser = new SendableChooser<>();
+
+  /** 配置系统选择器 */
+  private void configureSystemChooser() {
+    // 添加系统选项
+    systemChooser.addOption("PathPlanner", "pathplanner");
+    systemChooser.addOption("BLine", "bline");
+    systemChooser.addOption("None (Stop)", "none");
+
+    // 设置默认
+    systemChooser.setDefaultOption("PathPlanner", "pathplanner");
+
+    // 注册到NetworkTable
+    edu.wpi.first.wpilibj.smartdashboard.SmartDashboard.putData(
+        "Auto System Chooser", systemChooser);
   }
 
   /**
@@ -197,7 +238,8 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
     // Y button: Follow example path
-    controller.y().onTrue(BLineCommands.followPathFromFile(blinePathFollower, "example_a"));
+    // 注意：BLine路径跟随命令应该在自动模式或需要时调用getBLineCommand()方法
+    // 这里暂时禁用，因为路径文件需要在运行时加载
   }
 
   /**
@@ -224,6 +266,69 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoChooser.get();
+    // 获取选择的系统
+    String selectedSystem = systemChooser.getSelected();
+
+    // 默认为PathPlanner
+    if (selectedSystem == null) {
+      selectedSystem = "pathplanner";
+    }
+
+    // 根据选择的系统执行
+    switch (selectedSystem) {
+      case "pathplanner":
+        // PathPlanner系统
+        Command ppCommand = autoChooser.get();
+        if (ppCommand != null) {
+          return ppCommand;
+        }
+        // 如果PathPlanner返回空命令，返回停止
+        return Commands.runOnce(drive::stop, drive);
+
+      case "bline":
+        // BLine系统
+        String blinePath = blinePathChooser.getSelected();
+        if (blinePath != null && !blinePath.isEmpty()) {
+          return getBLineCommand(blinePath);
+        }
+        // 如果BLine没有选择，返回停止
+        return Commands.runOnce(drive::stop, drive);
+
+      case "none":
+      default:
+        // None - 停止
+        return Commands.runOnce(drive::stop, drive);
+    }
+  }
+
+  /**
+   * 构建BLine路径跟随命令（供自动模式使用）
+   *
+   * @param pathFilename 路径文件名（不含.json扩展名）
+   * @return 路径跟随命令，如果路径为空则返回停止命令
+   */
+  public Command getBLineCommand(String pathFilename) {
+    // 验证路径文件名
+    if (pathFilename == null || pathFilename.isEmpty()) {
+      return Commands.runOnce(drive::stop, drive);
+    }
+
+    try {
+      // 加载路径
+      Path path = blinePathFollower.loadPath(pathFilename);
+
+      // 验证路径是否成功加载
+      if (path == null) {
+        System.err.println("BLine: Failed to load path - " + pathFilename);
+        return Commands.runOnce(drive::stop, drive);
+      }
+
+      // 构建命令（带姿态重置）
+      return blinePathFollower.buildFollowCommandWithPoseReset(path);
+    } catch (Exception e) {
+      System.err.println(
+          "BLine: Error building command for " + pathFilename + ": " + e.getMessage());
+      return Commands.runOnce(drive::stop, drive);
+    }
   }
 }

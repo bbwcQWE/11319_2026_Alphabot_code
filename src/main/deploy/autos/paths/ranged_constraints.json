@@ -3,26 +3,26 @@
     {
       "type": "waypoint",
       "translation_target": {
-        "x_meters": 0.5,
-        "y_meters": 0.5,
+        "x_meters": 6.541942976753229,
+        "y_meters": 3.898592924423691,
         "intermediate_handoff_radius_meters": 0.2
       },
       "rotation_target": {
-        "rotation_radians": 0,
+        "rotation_radians": 0.0,
         "profiled_rotation": true
       }
     },
     {
       "type": "translation",
-      "x_meters": 2.0,
-      "y_meters": 0.5,
+      "x_meters": 5.9272629348895975,
+      "y_meters": 2.136359556203999,
       "intermediate_handoff_radius_meters": 0.2
     },
     {
       "type": "waypoint",
       "translation_target": {
-        "x_meters": 4.0,
-        "y_meters": 0.5,
+        "x_meters": 5.271325501358492,
+        "y_meters": 0.5125873812015698,
         "intermediate_handoff_radius_meters": 0.2
       },
       "rotation_target": {
@@ -32,15 +32,15 @@
     },
     {
       "type": "translation",
-      "x_meters": 4.0,
-      "y_meters": 2.5,
+      "x_meters": 4.83076715930357,
+      "y_meters": 0.4860190077489257,
       "intermediate_handoff_radius_meters": 0.2
     },
     {
       "type": "waypoint",
       "translation_target": {
-        "x_meters": 4.0,
-        "y_meters": 4.0,
+        "x_meters": 1.5580480468955695,
+        "y_meters": 1.7090966213144005,
         "intermediate_handoff_radius_meters": 0.2
       },
       "rotation_target": {
@@ -50,6 +50,11 @@
     }
   ],
   "constraints": {
+    "max_acceleration_meters_per_sec2": 7.0,
+    "end_translation_tolerance_meters": 0.03,
+    "max_velocity_deg_per_sec": 720.0,
+    "max_acceleration_deg_per_sec2": 1500.0,
+    "end_rotation_tolerance_deg": 2.0,
     "max_velocity_meters_per_sec": [
       {
         "value": 4.5,
@@ -61,11 +66,6 @@
         "start_ordinal": 2,
         "end_ordinal": 3
       }
-    ],
-    "max_acceleration_meters_per_sec2": 7.0,
-    "max_velocity_deg_per_sec": 720.0,
-    "max_acceleration_deg_per_sec2": 1500.0,
-    "end_translation_tolerance_meters": 0.03,
-    "end_rotation_tolerance_deg": 2.0
+    ]
   }
 }

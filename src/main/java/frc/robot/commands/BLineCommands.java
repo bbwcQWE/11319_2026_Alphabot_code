@@ -1,4 +1,4 @@
-// Copyright (c) 2025-2026 Team11319 Polaris
+// Copyright (c) 2025-2026 11319 Polaris
 // https://github.com/bbwcQWE
 //
 // Use of this source code is governed by a BSD
@@ -38,9 +38,14 @@ public final class BLineCommands {
    * @return 路径跟随命令
    */
   public static Command followPathFromFile(BLinePathFollower bline, String pathFilename) {
-    return Commands.sequence(
-        Commands.runOnce(() -> bline.loadPath(pathFilename)),
-        bline.buildFollowCommandWithPoseReset(bline.getCurrentPath()));
+    // 使用runOnce包装整个命令构建，避免在序列构造时立即执行
+    return Commands.runOnce(
+            () -> {
+              Path path = bline.loadPath(pathFilename);
+              Command followCmd = bline.buildFollowCommandWithPoseReset(path);
+              followCmd.schedule();
+            })
+        .andThen(Commands.none());
   }
 
   /**

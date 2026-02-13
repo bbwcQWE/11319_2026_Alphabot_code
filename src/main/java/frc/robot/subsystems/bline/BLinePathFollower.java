@@ -1,4 +1,4 @@
-// Copyright (c) 2025-2026 Team11319 Polaris
+// Copyright (c) 2025-2026 11319 Polaris
 // https://github.com/bbwcQWE
 //
 // Use of this source code is governed by a BSD
