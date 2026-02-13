@@ -323,8 +323,18 @@ public class RobotContainer {
         return Commands.runOnce(drive::stop, drive);
       }
 
-      // 构建命令（带姿态重置）
-      return blinePathFollower.buildFollowCommandWithPoseReset(path);
+      // Pre-Match Module Orientation: 获取初始模块方向并在命令开始前设置
+      // 这可以防止自动开始时模块旋转导致的微小偏差
+      Rotation2d initialDirection = path.getInitialModuleDirection();
+      
+      // 构建命令（带姿态重置和模块方向预设置）
+      Command followCommand = blinePathFollower.buildFollowCommandWithPoseReset(path);
+      
+      // 在命令开始时预设置模块方向
+      return Commands.sequence(
+          Commands.runOnce(() -> drive.setModuleOrientations(initialDirection)),
+          followCommand
+      );
     } catch (Exception e) {
       System.err.println(
           "BLine: Error building command for " + pathFilename + ": " + e.getMessage());
