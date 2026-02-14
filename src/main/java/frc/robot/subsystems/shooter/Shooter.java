@@ -7,17 +7,22 @@ package frc.robot.subsystems.shooter;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
-import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Kilograms;
+import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.AutoLog;
+import org.littletonrobotics.junction.Logger;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.FlyWheelConfig;
@@ -27,11 +32,20 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
-import yams.motorcontrollers.remote.TalonFXSWrapper;
 import yams.motorcontrollers.remote.TalonFXWrapper;
 
 public class Shooter extends SubsystemBase {
-  /** Creates a new Shooter. */
+
+  @AutoLog
+  public static class ShooterInputs {
+    public AngularVelocity velocity = DegreesPerSecond.of(0);
+    public AngularVelocity setpoint = DegreesPerSecond.of(0);
+    public Voltage volts = Volts.of(0);
+    public Current current = Amps.of(0);
+  }
+
+  private final ShooterInputsAutoLogged shooterInputs = new ShooterInputsAutoLogged();
+
   private SmartMotorControllerConfig shooterSmcConfig =
       new SmartMotorControllerConfig(this)
           .withControlMode(ControlMode.CLOSED_LOOP)
@@ -56,55 +70,56 @@ public class Shooter extends SubsystemBase {
           .withIdleMode(MotorMode.COAST)
           .withStatorCurrentLimit(Amps.of(40))
           .withFollowers(Pair.of(new TalonFX(17), true));
+
   private TalonFX shooterMotorLeft = new TalonFX(16);
 
-  private SmartMotorController shooterMotor = new TalonFXWrapper(shooterMotorLeft, DCMotor.getKrakenX60(1), shooterSmcConfig);
-  private final FlyWheelConfig shooterConfig = new FlyWheelConfig(shooterMotor)
-  .withDiameter(Inches.of(4))
-  .withMass(Kilograms.of(2))
-  .withUpperSoftLimit(RPM.of(5000));
+  private SmartMotorController shooterMotor =
+      new TalonFXWrapper(shooterMotorLeft, DCMotor.getKrakenX60(1), shooterSmcConfig);
+  private final FlyWheelConfig shooterConfig =
+      new FlyWheelConfig(shooterMotor)
+          .withDiameter(Inches.of(4))
+          .withMass(Kilograms.of(2))
+          .withUpperSoftLimit(RPM.of(5000));
 
   private FlyWheel shooterFlyWheel = new FlyWheel(shooterConfig);
-   
-   /**
-   * Gets the current velocity of the shooter.
-   *
-   * @return Shooter velocity.
-   */
-  public AngularVelocity getVelocity() {return shooterFlyWheel.getSpeed();}
 
-  /**
-   * Set the shooter velocity.
-   *
-   * @param speed Speed to set.
-   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
-   */
-  public Command setVelocity(AngularVelocity speed) {return shooterFlyWheel.run(speed);}
-  
-  /**
-   * Set the shooter velocity setpoint.
-   *
-   * @param speed Speed to set
-   */
-  public void setVelocitySetpoint(AngularVelocity speed) {shooterFlyWheel.setMechanismVelocitySetpoint(speed);}
-  
-   /**
-   * Set the dutycycle of the shooter.
-   *
-   * @param dutyCycle DutyCycle to set.
-   * @return {@link edu.wpi.first.wpilibj2.command.RunCommand}
-   */
-  public Command set(double dutyCycle) {return shooterFlyWheel.set(dutyCycle);}
+  private void updateInputs() {
+    shooterInputs.velocity = shooterFlyWheel.getSpeed();
+    shooterInputs.setpoint = shooterMotor.getMechanismSetpointVelocity().orElse(RPM.of(0));
+    shooterInputs.volts = shooterMotor.getVoltage();
+    shooterInputs.current = shooterMotor.getStatorCurrent();
+  }
+
+  public AngularVelocity getVelocity() {
+    return shooterInputs.velocity;
+  }
+
+  public Command setVelocity(AngularVelocity speed) {
+    Logger.recordOutput("Shooter/Setpoint", speed);
+    return shooterFlyWheel.run(speed);
+  }
+
+  public void setVelocitySetpoint(AngularVelocity speed) {
+    Logger.recordOutput("Shooter/Setpoint", speed);
+    shooterFlyWheel.setMechanismVelocitySetpoint(speed);
+  }
+
+  public Command set(double dutyCycle) {
+    Logger.recordOutput("Shooter/DutyCycle", dutyCycle);
+    return shooterFlyWheel.set(dutyCycle);
+  }
+
   public Shooter() {}
 
   @Override
   public void periodic() {
+    updateInputs();
+    Logger.processInputs("Shooter", shooterInputs);
     shooterFlyWheel.updateTelemetry();
-    // This method will be called once per scheduler run
   }
-    @Override
+
+  @Override
   public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
     shooterFlyWheel.simIterate();
   }
 }
