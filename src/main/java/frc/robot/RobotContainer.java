@@ -29,6 +29,7 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -46,6 +47,7 @@ public class RobotContainer {
   private final Drive drive;
   private final Vision vision;
   private final BLinePathFollower blinePathFollower;
+  private final Shooter shooter;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -326,15 +328,13 @@ public class RobotContainer {
       // Pre-Match Module Orientation: 获取初始模块方向并在命令开始前设置
       // 这可以防止自动开始时模块旋转导致的微小偏差
       Rotation2d initialDirection = path.getInitialModuleDirection();
-      
+
       // 构建命令（带姿态重置和模块方向预设置）
       Command followCommand = blinePathFollower.buildFollowCommandWithPoseReset(path);
-      
+
       // 在命令开始时预设置模块方向
       return Commands.sequence(
-          Commands.runOnce(() -> drive.setModuleOrientations(initialDirection)),
-          followCommand
-      );
+          Commands.runOnce(() -> drive.setModuleOrientations(initialDirection)), followCommand);
     } catch (Exception e) {
       System.err.println(
           "BLine: Error building command for " + pathFilename + ": " + e.getMessage());
