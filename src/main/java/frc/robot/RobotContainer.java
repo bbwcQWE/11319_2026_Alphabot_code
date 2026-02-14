@@ -254,6 +254,9 @@ public class RobotContainer {
     // Y button: Follow example path
     // 注意：BLine路径跟随命令应该在自动模式或需要时调用getBLineCommand()方法
     // 这里暂时禁用，因为路径文件需要在运行时加载
+
+    // SysId tests for shooter subsystems
+    controller.y().whileTrue(shooter.getHood().sysId());
   }
 
   /**

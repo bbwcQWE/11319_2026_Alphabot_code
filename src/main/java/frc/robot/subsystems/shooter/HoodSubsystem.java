@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 
@@ -109,6 +110,10 @@ public class HoodSubsystem extends SubsystemBase {
 
   public Command setDutyCycle(double dutyCycle) {
     return hood.set(dutyCycle);
+  }
+
+  public Command sysId() {
+    return hood.sysId(Volts.of(7), Volts.of(2).per(Second), Seconds.of(4));
   }
 
   @Override
