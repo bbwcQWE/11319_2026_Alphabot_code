@@ -1,3 +1,5 @@
+// Copyright (c) 2025-2026 Team11319 Polaris
+// https://github.com/bbwcQWE
 package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.Degrees;
