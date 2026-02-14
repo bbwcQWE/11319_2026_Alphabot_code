@@ -78,6 +78,9 @@ public class RobotContainer {
                     VisionConstants.camera0Name, VisionConstants.robotToCamera0),
                 new VisionIOPhotonVision(
                     VisionConstants.camera1Name, VisionConstants.robotToCamera1));
+
+        // Initialize shooter subsystem
+        shooter = new Shooter();
         break;
 
       case SIM:
@@ -98,6 +101,9 @@ public class RobotContainer {
                     VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose),
                 new VisionIOPhotonVisionSim(
                     VisionConstants.camera1Name, VisionConstants.robotToCamera1, drive::getPose));
+
+        // Initialize shooter subsystem
+        shooter = new Shooter();
         break;
 
       default:
@@ -112,6 +118,9 @@ public class RobotContainer {
 
         // Disable vision in replay mode
         vision = new Vision(drive::addVisionMeasurement);
+
+        // Initialize shooter subsystem
+        shooter = new Shooter();
         break;
     }
 
