@@ -29,7 +29,7 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
-import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterSubsystem;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -47,7 +47,7 @@ public class RobotContainer {
   private final Drive drive;
   private final Vision vision;
   private final BLinePathFollower blinePathFollower;
-  private final Shooter shooter;
+  private final ShooterSubsystem shooter;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -80,7 +80,7 @@ public class RobotContainer {
                     VisionConstants.camera1Name, VisionConstants.robotToCamera1));
 
         // Initialize shooter subsystem
-        shooter = new Shooter();
+        shooter = new ShooterSubsystem();
         break;
 
       case SIM:
@@ -103,7 +103,7 @@ public class RobotContainer {
                     VisionConstants.camera1Name, VisionConstants.robotToCamera1, drive::getPose));
 
         // Initialize shooter subsystem
-        shooter = new Shooter();
+        shooter = new ShooterSubsystem();
         break;
 
       default:
@@ -120,12 +120,15 @@ public class RobotContainer {
         vision = new Vision(drive::addVisionMeasurement);
 
         // Initialize shooter subsystem
-        shooter = new Shooter();
+        shooter = new ShooterSubsystem();
         break;
     }
 
     // Register vision subsystem to enable periodic() calls
     vision.register();
+
+    // Register shooter subsystem to enable periodic() calls
+    shooter.register();
 
     // Initialize BLine Path Follower subsystem
     blinePathFollower = new BLinePathFollower(drive);
