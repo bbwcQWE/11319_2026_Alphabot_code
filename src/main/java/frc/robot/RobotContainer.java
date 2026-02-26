@@ -29,7 +29,6 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
-import frc.robot.subsystems.shooter.ShooterSubsystem;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -47,7 +46,7 @@ public class RobotContainer {
   private final Drive drive;
   private final Vision vision;
   private final BLinePathFollower blinePathFollower;
-  private final ShooterSubsystem shooter;
+  // private final ShooterSubsystem shooter;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -80,7 +79,7 @@ public class RobotContainer {
                     VisionConstants.camera1Name, VisionConstants.robotToCamera1));
 
         // Initialize shooter subsystem
-        shooter = new ShooterSubsystem();
+        // shooter = new ShooterSubsystem();
         break;
 
       case SIM:
@@ -103,7 +102,7 @@ public class RobotContainer {
                     VisionConstants.camera1Name, VisionConstants.robotToCamera1, drive::getPose));
 
         // Initialize shooter subsystem
-        shooter = new ShooterSubsystem();
+        // shooter = new ShooterSubsystem();
         break;
 
       default:
@@ -120,7 +119,7 @@ public class RobotContainer {
         vision = new Vision(drive::addVisionMeasurement);
 
         // Initialize shooter subsystem
-        shooter = new ShooterSubsystem();
+        // shooter = new ShooterSubsystem();
         break;
     }
 
@@ -128,7 +127,7 @@ public class RobotContainer {
     vision.register();
 
     // Register shooter subsystem to enable periodic() calls
-    shooter.register();
+    // shooter.register();
 
     // Initialize BLine Path Follower subsystem
     blinePathFollower = new BLinePathFollower(drive);
@@ -256,7 +255,7 @@ public class RobotContainer {
     // 这里暂时禁用，因为路径文件需要在运行时加载
 
     // SysId tests for shooter subsystems
-    controller.y().whileTrue(shooter.getHood().sysId());
+    // controller.y().whileTrue(shooter.getHood().sysId());
   }
 
   /**
