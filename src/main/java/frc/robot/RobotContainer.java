@@ -29,6 +29,8 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.feeder.FeederSubsystem;
+import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -46,6 +48,8 @@ public class RobotContainer {
   private final Drive drive;
   private final Vision vision;
   private final BLinePathFollower blinePathFollower;
+  private final FeederSubsystem feeder;
+  private final IntakeSubsystem intake;
   // private final ShooterSubsystem shooter;
 
   // Controller
@@ -78,6 +82,10 @@ public class RobotContainer {
                 new VisionIOPhotonVision(
                     VisionConstants.camera1Name, VisionConstants.robotToCamera1));
 
+        // Initialize feeder and intake subsystems
+        feeder = new FeederSubsystem();
+        intake = new IntakeSubsystem();
+
         // Initialize shooter subsystem
         // shooter = new ShooterSubsystem();
         break;
@@ -101,6 +109,10 @@ public class RobotContainer {
                 new VisionIOPhotonVisionSim(
                     VisionConstants.camera1Name, VisionConstants.robotToCamera1, drive::getPose));
 
+        // Initialize feeder and intake subsystems
+        feeder = new FeederSubsystem();
+        intake = new IntakeSubsystem();
+
         // Initialize shooter subsystem
         // shooter = new ShooterSubsystem();
         break;
@@ -118,6 +130,10 @@ public class RobotContainer {
         // Disable vision in replay mode
         vision = new Vision(drive::addVisionMeasurement);
 
+        // Initialize feeder and intake subsystems
+        feeder = new FeederSubsystem();
+        intake = new IntakeSubsystem();
+
         // Initialize shooter subsystem
         // shooter = new ShooterSubsystem();
         break;
@@ -125,6 +141,10 @@ public class RobotContainer {
 
     // Register vision subsystem to enable periodic() calls
     vision.register();
+
+    // Register feeder and intake subsystems
+    feeder.register();
+    intake.register();
 
     // Register shooter subsystem to enable periodic() calls
     // shooter.register();
@@ -274,6 +294,24 @@ public class RobotContainer {
    */
   public Drive getDrive() {
     return drive;
+  }
+
+  /**
+   * Get the Feeder subsystem
+   *
+   * @return FeederSubsystem instance
+   */
+  public FeederSubsystem getFeeder() {
+    return feeder;
+  }
+
+  /**
+   * Get the Intake subsystem
+   *
+   * @return IntakeSubsystem instance
+   */
+  public IntakeSubsystem getIntake() {
+    return intake;
   }
 
   /**
