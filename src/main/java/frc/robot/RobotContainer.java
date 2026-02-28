@@ -12,12 +12,15 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
@@ -29,12 +32,15 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.shooter.HoodSubsystem;
+import frc.robot.util.Zones;
 // import frc.robot.subsystems.feeder.FeederSubsystem;
 // import frc.robot.subsystems.intake.IntakeSubsystem;
 // import frc.robot.subsystems.vision.Vision;
 // import frc.robot.subsystems.vision.VisionConstants;
 // import frc.robot.subsystems.vision.VisionIOPhotonVision;
 // import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -48,9 +54,24 @@ public class RobotContainer {
   private final Drive drive;
   // private final Vision vision;
   private final BLinePathFollower blinePathFollower;
+  private HoodSubsystem hood;
   // private final FeederSubsystem feeder;
   // private final IntakeSubsystem intake;
   // private final ShooterSubsystem shooter;
+
+  // Zone相关的Suppliers - 在构造函数中初始化
+  private Supplier<Pose2d> poseSupplier;
+  private Supplier<ChassisSpeeds> fieldSpeedsSupplier;
+
+  // 炮塔位置Suppliers（考虑偏移）- 在构造函数中初始化
+  private Supplier<Translation2d> turretPoseSupplier;
+  private Supplier<ChassisSpeeds> turretFieldSpeedsSupplier;
+
+  // Zone定义 - 根据实际场地尺寸调整
+  public Zones.PredictiveXZone trenchZone;
+
+  // Zone Trigger - 用于命令绑定
+  public Trigger inTrenchZoneTrigger;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -149,6 +170,33 @@ public class RobotContainer {
 
     // Register shooter subsystem to enable periodic() calls
     // shooter.register();
+
+    // Initialize HoodSubsystem
+    hood = new HoodSubsystem();
+    hood.register();
+
+    // 初始化Zone相关的Suppliers
+    poseSupplier = drive::getPose;
+    fieldSpeedsSupplier = drive::getFieldSpeeds;
+
+    // 初始化炮塔位置Suppliers（考虑偏移）
+    turretPoseSupplier =
+        () -> drive.getPose().getTranslation().plus(Constants.FieldConstants.TURRET_OFFSET);
+    turretFieldSpeedsSupplier = drive::getFieldSpeeds;
+
+    // 初始化Trench Zone (使用Constants中的值)
+    // x: 0到5.5米, y: 2.5到4.5米
+    trenchZone =
+        new Zones.PredictiveXBaseZone(
+            Constants.FieldConstants.TRENCH_X_START,
+            Constants.FieldConstants.TRENCH_X_END,
+            Constants.FieldConstants.TRENCH_Y_MIN,
+            Constants.FieldConstants.TRENCH_Y_MAX);
+
+    // 创建基于Translation2d的Zone Trigger - 使用炮塔位置
+    inTrenchZoneTrigger =
+        trenchZone.willContainTranslation(
+            turretPoseSupplier, turretFieldSpeedsSupplier, Constants.FieldConstants.DUCK_TIME);
 
     // Initialize BLine Path Follower subsystem
     blinePathFollower = new BLinePathFollower(drive);
@@ -319,6 +367,12 @@ public class RobotContainer {
 
     // SysId tests for shooter subsystems
     // controller.y().whileTrue(shooter.getHood().sysId());
+
+    // Hood自动收回 - 当进入trench区域时收回hood
+    if (hood != null) {
+      inTrenchZoneTrigger.onTrue(hood.setAngle(Constants.FieldConstants.MIN_HOOD_ANGLE));
+      inTrenchZoneTrigger.onFalse(hood.setAngle(Constants.FieldConstants.DEFAULT_HOOD_ANGLE));
+    }
   }
 
   /**
