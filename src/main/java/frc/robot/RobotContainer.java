@@ -190,22 +190,64 @@ public class RobotContainer {
 
   /** Configure BLine auto routines for the chooser */
   private void configureBLineAutoChooser() {
-    // 获取路径目录
-    java.io.File pathsDir = new java.io.File("src/main/deploy/autos/paths");
-
     // 添加默认选项
     blinePathChooser.setDefaultOption("None", "");
 
-    if (pathsDir.exists() && pathsDir.isDirectory()) {
-      // 获取所有.json文件
-      java.io.File[] jsonFiles = pathsDir.listFiles((dir, name) -> name.endsWith(".json"));
+    // 尝试多种方式获取路径文件
+    boolean foundPaths = false;
 
-      if (jsonFiles != null) {
-        for (java.io.File file : jsonFiles) {
-          // 获取文件名（不含扩展名）
-          String pathName = file.getName().replace(".json", "");
-          blinePathChooser.addOption(pathName, pathName);
+    // 方法1: 尝试从deploy目录读取 (运行时)
+    String[] possiblePaths = {
+      "/home/lvuser/deploy/autos/paths", // RoboRIO路径
+      "src/main/deploy/autos/paths", // 开发环境相对路径
+      "deploy/autos/paths" // 另一种可能的路径
+    };
+
+    for (String basePath : possiblePaths) {
+      java.io.File pathsDir = new java.io.File(basePath);
+      if (pathsDir.exists() && pathsDir.isDirectory()) {
+        java.io.File[] jsonFiles = pathsDir.listFiles((dir, name) -> name.endsWith(".json"));
+        if (jsonFiles != null && jsonFiles.length > 0) {
+          for (java.io.File file : jsonFiles) {
+            String pathName = file.getName().replace(".json", "");
+            blinePathChooser.addOption(pathName, pathName);
+            foundPaths = true;
+          }
+          break;
         }
+      }
+    }
+
+    // 方法2: 如果文件系统方法失败，尝试从classpath资源读取
+    if (!foundPaths) {
+      try {
+        java.net.URL resourceUrl = getClass().getClassLoader().getResource("autos/paths");
+        if (resourceUrl != null) {
+          java.io.File pathsDir = new java.io.File(resourceUrl.getPath());
+          if (pathsDir.exists() && pathsDir.isDirectory()) {
+            java.io.File[] jsonFiles = pathsDir.listFiles((dir, name) -> name.endsWith(".json"));
+            if (jsonFiles != null) {
+              for (java.io.File file : jsonFiles) {
+                String pathName = file.getName().replace(".json", "");
+                blinePathChooser.addOption(pathName, pathName);
+                foundPaths = true;
+              }
+            }
+          }
+        }
+      } catch (Exception e) {
+        // 忽略错误，继续使用默认选项
+      }
+    }
+
+    // 如果仍然没有找到路径，手动添加已知路径（基于项目结构）
+    if (!foundPaths) {
+      // 这些是项目中的已知路径文件
+      String[] knownPaths = {
+        "auto_Down", "example_a", "example_b", "multi_point", "ranged_constraints", "simple_move"
+      };
+      for (String pathName : knownPaths) {
+        blinePathChooser.addOption(pathName, pathName);
       }
     }
 
