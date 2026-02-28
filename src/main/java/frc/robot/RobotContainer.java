@@ -29,12 +29,12 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
-import frc.robot.subsystems.feeder.FeederSubsystem;
-import frc.robot.subsystems.intake.IntakeSubsystem;
-import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionConstants;
-import frc.robot.subsystems.vision.VisionIOPhotonVision;
-import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+// import frc.robot.subsystems.feeder.FeederSubsystem;
+// import frc.robot.subsystems.intake.IntakeSubsystem;
+// import frc.robot.subsystems.vision.Vision;
+// import frc.robot.subsystems.vision.VisionConstants;
+// import frc.robot.subsystems.vision.VisionIOPhotonVision;
+// import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -46,10 +46,10 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  private final Vision vision;
+  // private final Vision vision;
   private final BLinePathFollower blinePathFollower;
-  private final FeederSubsystem feeder;
-  private final IntakeSubsystem intake;
+  // private final FeederSubsystem feeder;
+  // private final IntakeSubsystem intake;
   // private final ShooterSubsystem shooter;
 
   // Controller
@@ -74,17 +74,17 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackRight));
 
         // Instantiate vision subsystem with PhotonVision cameras
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOPhotonVision(
-                    VisionConstants.camera0Name, VisionConstants.robotToCamera0),
-                new VisionIOPhotonVision(
-                    VisionConstants.camera1Name, VisionConstants.robotToCamera1));
+        // vision =
+        //     new Vision(
+        //         drive::addVisionMeasurement,
+        //         new VisionIOPhotonVision(
+        //             VisionConstants.camera0Name, VisionConstants.robotToCamera0),
+        //         new VisionIOPhotonVision(
+        //             VisionConstants.camera1Name, VisionConstants.robotToCamera1));
 
         // Initialize feeder and intake subsystems
-        feeder = new FeederSubsystem();
-        intake = new IntakeSubsystem();
+        // feeder = new FeederSubsystem();
+        // intake = new IntakeSubsystem();
 
         // Initialize shooter subsystem
         // shooter = new ShooterSubsystem();
@@ -101,17 +101,18 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackRight));
 
         // Instantiate vision subsystem with simulated cameras
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOPhotonVisionSim(
-                    VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose),
-                new VisionIOPhotonVisionSim(
-                    VisionConstants.camera1Name, VisionConstants.robotToCamera1, drive::getPose));
+        // vision =
+        //     new Vision(
+        //         drive::addVisionMeasurement,
+        //         new VisionIOPhotonVisionSim(
+        //             VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose),
+        //         new VisionIOPhotonVisionSim(
+        //             VisionConstants.camera1Name, VisionConstants.robotToCamera1,
+        // drive::getPose));
 
         // Initialize feeder and intake subsystems
-        feeder = new FeederSubsystem();
-        intake = new IntakeSubsystem();
+        // feeder = new FeederSubsystem();
+        // intake = new IntakeSubsystem();
 
         // Initialize shooter subsystem
         // shooter = new ShooterSubsystem();
@@ -128,11 +129,11 @@ public class RobotContainer {
                 new ModuleIO() {});
 
         // Disable vision in replay mode
-        vision = new Vision(drive::addVisionMeasurement);
+        // vision = new Vision(drive::addVisionMeasurement);
 
         // Initialize feeder and intake subsystems
-        feeder = new FeederSubsystem();
-        intake = new IntakeSubsystem();
+        // feeder = new FeederSubsystem();
+        // intake = new IntakeSubsystem();
 
         // Initialize shooter subsystem
         // shooter = new ShooterSubsystem();
@@ -140,11 +141,11 @@ public class RobotContainer {
     }
 
     // Register vision subsystem to enable periodic() calls
-    vision.register();
+    // vision.register();
 
     // Register feeder and intake subsystems
-    feeder.register();
-    intake.register();
+    // feeder.register();
+    // intake.register();
 
     // Register shooter subsystem to enable periodic() calls
     // shooter.register();
@@ -296,23 +297,23 @@ public class RobotContainer {
     return drive;
   }
 
-  /**
-   * Get the Feeder subsystem
-   *
-   * @return FeederSubsystem instance
-   */
-  public FeederSubsystem getFeeder() {
-    return feeder;
-  }
+  // /**
+  //  * Get the Feeder subsystem
+  //  *
+  //  * @return FeederSubsystem instance
+  //  */
+  // public FeederSubsystem getFeeder() {
+  //   return feeder;
+  // }
 
-  /**
-   * Get the Intake subsystem
-   *
-   * @return IntakeSubsystem instance
-   */
-  public IntakeSubsystem getIntake() {
-    return intake;
-  }
+  // /**
+  //  * Get the Intake subsystem
+  //  *
+  //  * @return IntakeSubsystem instance
+  //  */
+  // public IntakeSubsystem getIntake() {
+  //   return intake;
+  // }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
