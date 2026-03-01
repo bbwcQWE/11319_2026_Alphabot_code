@@ -1,5 +1,7 @@
 // Copyright (c) 2025-2026 Team11319 Polaris
 // https://github.com/bbwcQWE
+//  Intake子系统 - 控制 intake 机构
+
 package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Amps;

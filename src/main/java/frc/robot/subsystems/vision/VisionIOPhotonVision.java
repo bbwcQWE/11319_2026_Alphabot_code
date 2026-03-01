@@ -1,9 +1,7 @@
 // Copyright (c) 2021-2026 Littleton Robotics
 // http://github.com/Mechanical-Advantage
 //
-// Use of this source code is governed by a BSD
-// license that can be found in the LICENSE file
-// at the root directory of this project.
+// 本项目源代码受BSD许可证约束，详情请参阅LICENSE文件
 
 package frc.robot.subsystems.vision;
 
@@ -18,16 +16,16 @@ import java.util.List;
 import java.util.Set;
 import org.photonvision.PhotonCamera;
 
-/** IO implementation for real PhotonVision hardware. */
+/** PhotonVision硬件的IO实现 */
 public class VisionIOPhotonVision implements VisionIO {
   protected final PhotonCamera camera;
   protected final Transform3d robotToCamera;
 
   /**
-   * Creates a new VisionIOPhotonVision.
+   * 创建新的VisionIOPhotonVision
    *
-   * @param name The configured name of the camera.
-   * @param robotToCamera The 3D position of the camera relative to the robot.
+   * @param name 相机的配置名称
+   * @param robotToCamera 相机相对于机器人的3D位置
    */
   public VisionIOPhotonVision(String name, Transform3d robotToCamera) {
     camera = new PhotonCamera(name);
@@ -38,11 +36,11 @@ public class VisionIOPhotonVision implements VisionIO {
   public void updateInputs(VisionIOInputs inputs) {
     inputs.connected = camera.isConnected();
 
-    // Read new camera observations
+    // 读取新的相机观测数据
     Set<Short> tagIds = new HashSet<>();
     List<PoseObservation> poseObservations = new LinkedList<>();
     for (var result : camera.getAllUnreadResults()) {
-      // Update latest target observation
+      // 更新最新目标观测
       if (result.hasTargets()) {
         inputs.latestTargetObservation =
             new TargetObservation(
@@ -52,38 +50,38 @@ public class VisionIOPhotonVision implements VisionIO {
         inputs.latestTargetObservation = new TargetObservation(Rotation2d.kZero, Rotation2d.kZero);
       }
 
-      // Add pose observation
-      if (result.multitagResult.isPresent()) { // Multitag result
+      // 添加姿态观测
+      if (result.multitagResult.isPresent()) { // 多标签结果
         var multitagResult = result.multitagResult.get();
 
-        // Calculate robot pose
+        // 计算机器人姿态
         Transform3d fieldToCamera = multitagResult.estimatedPose.best;
         Transform3d fieldToRobot = fieldToCamera.plus(robotToCamera.inverse());
         Pose3d robotPose = new Pose3d(fieldToRobot.getTranslation(), fieldToRobot.getRotation());
 
-        // Calculate average tag distance
+        // 计算平均标签距离
         double totalTagDistance = 0.0;
         for (var target : result.targets) {
           totalTagDistance += target.bestCameraToTarget.getTranslation().getNorm();
         }
 
-        // Add tag IDs
+        // 添加标签ID
         tagIds.addAll(multitagResult.fiducialIDsUsed);
 
-        // Add observation
+        // 添加观测
         poseObservations.add(
             new PoseObservation(
-                result.getTimestampSeconds(), // Timestamp
-                robotPose, // 3D pose estimate
-                multitagResult.estimatedPose.ambiguity, // Ambiguity
-                multitagResult.fiducialIDsUsed.size(), // Tag count
-                totalTagDistance / result.targets.size(), // Average tag distance
-                PoseObservationType.PHOTONVISION)); // Observation type
+                result.getTimestampSeconds(), // 时间戳
+                robotPose, // 3D姿态估计
+                multitagResult.estimatedPose.ambiguity, // 歧义度
+                multitagResult.fiducialIDsUsed.size(), // 标签数量
+                totalTagDistance / result.targets.size(), // 平均标签距离
+                PoseObservationType.PHOTONVISION)); // 观测类型
 
-      } else if (!result.targets.isEmpty()) { // Single tag result
+      } else if (!result.targets.isEmpty()) { // 单标签结果
         var target = result.targets.get(0);
 
-        // Calculate robot pose
+        // 计算机器人姿态
         var tagPose = aprilTagLayout.getTagPose(target.fiducialId);
         if (tagPose.isPresent()) {
           Transform3d fieldToTarget =
@@ -93,29 +91,29 @@ public class VisionIOPhotonVision implements VisionIO {
           Transform3d fieldToRobot = fieldToCamera.plus(robotToCamera.inverse());
           Pose3d robotPose = new Pose3d(fieldToRobot.getTranslation(), fieldToRobot.getRotation());
 
-          // Add tag ID
+          // 添加标签ID
           tagIds.add((short) target.fiducialId);
 
-          // Add observation
+          // 添加观测
           poseObservations.add(
               new PoseObservation(
-                  result.getTimestampSeconds(), // Timestamp
-                  robotPose, // 3D pose estimate
-                  target.poseAmbiguity, // Ambiguity
-                  1, // Tag count
-                  cameraToTarget.getTranslation().getNorm(), // Average tag distance
-                  PoseObservationType.PHOTONVISION)); // Observation type
+                  result.getTimestampSeconds(), // 时间戳
+                  robotPose, // 3D姿态估计
+                  target.poseAmbiguity, // 歧义度
+                  1, // 标签数量
+                  cameraToTarget.getTranslation().getNorm(), // 平均标签距离
+                  PoseObservationType.PHOTONVISION)); // 观测类型
         }
       }
     }
 
-    // Save pose observations to inputs object
+    // 保存姿态观测到输入对象
     inputs.poseObservations = new PoseObservation[poseObservations.size()];
     for (int i = 0; i < poseObservations.size(); i++) {
       inputs.poseObservations[i] = poseObservations.get(i);
     }
 
-    // Save tag IDs to inputs objects
+    // 保存标签ID到输入对象
     inputs.tagIds = new int[tagIds.size()];
     int i = 0;
     for (int id : tagIds) {

@@ -1,12 +1,10 @@
 // Copyright (c) 2025-2026 11319 Polaris
 // https://github.com/bbwcQWE
 //
-// Based on Littleton Robotics AdvantageKit TalonFX(S) Swerve Template
+// 基于 Littleton Robotics AdvantageKit TalonFX(S) Swerve 模板
 // http://github.com/Mechanical-Advantage
 //
-// Use of this source code is governed by a BSD
-// license that can be found in the LICENSE file
-// at the root directory of this project.
+// 本项目源代码受BSD许可证约束，详情请参阅LICENSE文件
 
 package frc.robot;
 
@@ -20,17 +18,15 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 /**
- * The VM is configured to automatically run this class, and to call the functions corresponding to
- * each mode, as described in the TimedRobot documentation. If you change the name of this class or
- * the package after creating this project, you must also update the build.gradle file in the
- * project.
+ * 虚拟机配置为自动运行此类，并按照TimedRobot文档中的描述调用各模式对应的函数。
+ * 如果在创建此项目后更改了此类名或包名，还必须更新build.gradle文件。
  */
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
 
   public Robot() {
-    // Record metadata
+    // 记录元数据
     Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
     Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
     Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
@@ -39,115 +35,112 @@ public class Robot extends LoggedRobot {
     Logger.recordMetadata(
         "GitDirty",
         switch (BuildConstants.DIRTY) {
-          case 0 -> "All changes committed";
-          case 1 -> "Uncommitted changes";
-          default -> "Unknown";
+          case 0 -> "所有更改已提交";
+          case 1 -> "存在未提交的更改";
+          default -> "未知";
         });
 
-    // Set up data receivers & replay source
+    // 设置数据接收器和回放源
     switch (Constants.currentMode) {
       case REAL:
-        // Running on a real robot, log to a USB stick ("/U/logs")
+        // 在真实机器人上运行，记录到USB存储 ("/U/logs")
         Logger.addDataReceiver(new WPILOGWriter());
         Logger.addDataReceiver(new NT4Publisher());
         break;
 
       case SIM:
-        // Running a physics simulator, log to NT
+        // 运行物理模拟器，记录到NT
         Logger.addDataReceiver(new NT4Publisher());
         break;
 
       case REPLAY:
-        // Replaying a log, set up replay source
-        setUseTiming(false); // Run as fast as possible
+        // 回放日志，设置回放源
+        setUseTiming(false); // 全速运行
         String logPath = LogFileUtil.findReplayLog();
         Logger.setReplaySource(new WPILOGReader(logPath));
         Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
         break;
     }
 
-    // Start AdvantageKit logger
+    // 启动AdvantageKit日志记录器
     Logger.start();
 
-    // Instantiate our RobotContainer. This will perform all our button bindings,
-    // and put our autonomous chooser on the dashboard.
+    // 实例化RobotContainer将执行所有按钮绑定，并在Dashboard上显示自动选择器
     robotContainer = new RobotContainer();
   }
 
-  /** This function is called periodically during all modes. */
+  /** 此函数在所有模式下周期性调用 */
   @Override
   public void robotPeriodic() {
-    // Optionally switch the thread to high priority to improve loop
-    // timing (see the template project documentation for details)
+    // 可选：将线程切换到高优先级以改善循环时间
+    // (详见模板项目文档)
     // Threads.setCurrentThreadPriority(true, 99);
 
-    // Runs the Scheduler. This is responsible for polling buttons, adding
-    // newly-scheduled commands, running already-scheduled commands, removing
-    // finished or interrupted commands, and running subsystem periodic() methods.
-    // This must be called from the robot's periodic block in order for anything in
-    // the Command-based framework to work.
+    // 运行调度器。负责轮询按钮、添加新调度的命令、
+    // 运行已调度的命令、移除已完成或中断的命令，
+    // 并运行子系统的periodic()方法。
+    // 必须从机器人的periodic块调用此方法，Command-based框架才能正常工作。
     CommandScheduler.getInstance().run();
 
-    // Return to non-RT thread priority (do not modify the first argument)
+    // 恢复非实时线程优先级（请勿修改第一个参数）
     // Threads.setCurrentThreadPriority(false, 10);
   }
 
-  /** This function is called once when the robot is disabled. */
+  /** 机器人禁用时调用一次 */
   @Override
   public void disabledInit() {}
 
-  /** This function is called periodically when disabled. */
+  /** 机器人禁用时周期性调用 */
   @Override
   public void disabledPeriodic() {}
 
-  /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
+  /** 运行由RobotContainer类选择的自动命令 */
   @Override
   public void autonomousInit() {
     autonomousCommand = robotContainer.getAutonomousCommand();
 
-    // schedule the autonomous command
-    // Note: Pre-Match Module Orientation 已在 getBLineCommand() 中处理
+    // 调度自动命令
+    // 注意：预赛模块方向已在getBLineCommand()中处理
     if (autonomousCommand != null) {
       CommandScheduler.getInstance().schedule(autonomousCommand);
     }
   }
 
-  /** This function is called periodically during autonomous. */
+  /** 自动模式期间周期性调用 */
   @Override
   public void autonomousPeriodic() {}
 
-  /** This function is called once when teleop is enabled. */
+  /** 启用遥控模式时调用一次 */
   @Override
   public void teleopInit() {
-    // This makes sure that the autonomous stops running when
-    // teleop starts running. If you want the autonomous to
-    // continue until interrupted by another command, remove
-    // this line or comment it out.
+    // 确保当遥控开始时自动模式停止运行。
+    // 如果希望自动模式继续运行直到被另一个命令中断，
+    // 请删除此行或注释掉。
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
   }
 
-  /** This function is called periodically during operator control. */
+  /** 操作员控制期间周期性调用 */
   @Override
   public void teleopPeriodic() {}
 
-  /** This function is called once when test mode is enabled. */
+  /** 启用测试模式时调用一次 */
   @Override
   public void testInit() {
-    // Cancels all running commands at the start of test mode.
+    // 测试模式开始时取消所有运行中的命令
     CommandScheduler.getInstance().cancelAll();
   }
 
-  /** This function is called periodically during test mode. */
+  /** 测试模式期间周期性调用 */
   @Override
   public void testPeriodic() {}
 
-  /** This function is called once when the robot is first started up. */
+  /** 机器人首次启动时调用一次 */
   @Override
   public void simulationInit() {}
 
-  /** This function is called periodically whilst in simulation. */
+  /** 模拟期间周期性调用 */
   @Override
   public void simulationPeriodic() {}
 }

@@ -1,5 +1,7 @@
 // Copyright (c) 2025-2026 Team11319 Polaris
 // https://github.com/bbwcQWE
+// 发射器子系统 - Hood（瞄准机构）
+
 package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.Amps;

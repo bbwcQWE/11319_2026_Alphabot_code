@@ -1,12 +1,10 @@
 // Copyright (c) 2025-2026 11319 Polaris
 // https://github.com/bbwcQWE
 //
-// Based on Littleton Robotics AdvantageKit TalonFX(S) Swerve Template
+// 基于 Littleton Robotics AdvantageKit TalonFX(S) Swerve 模板
 // http://github.com/Mechanical-Advantage
 //
-// Use of this source code is governed by a BSD
-// license that can be found in the LICENSE file
-// at the root directory of this project.
+// 本项目源代码受BSD许可证约束，详情请参阅LICENSE文件
 
 package frc.robot;
 
@@ -21,22 +19,21 @@ import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
- * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
- * on a roboRIO. Change the value of "simMode" to switch between "sim" (physics sim) and "replay"
- * (log replay from a file).
+ * 定义AdvantageKit运行时模式的类。在roboRIO上运行时模式始终为"real"。
+ * 修改"simMode"的值可在"sim"（物理模拟）和"replay"（从文件回放日志）之间切换。
  */
 public final class Constants {
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
   public static enum Mode {
-    /** Running on a real robot. */
+    /** 在真实机器人上运行 */
     REAL,
 
-    /** Running a physics simulator. */
+    /** 运行物理模拟器 */
     SIM,
 
-    /** Replaying from a log file. */
+    /** 从日志文件回放 */
     REPLAY
   }
 

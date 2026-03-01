@@ -1,5 +1,7 @@
 // Copyright (c) 2025-2026 Team11319 Polaris
 // https://github.com/bbwcQWE
+// 供料子系统 - 控制供料机构和分度器
+
 package frc.robot.subsystems.feeder;
 
 import static edu.wpi.first.units.Units.Amps;

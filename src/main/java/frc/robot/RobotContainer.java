@@ -1,12 +1,10 @@
 // Copyright (c) 2025-2026 11319 Polaris
 // https://github.com/bbwcQWE
 //
-// Based on Littleton Robotics AdvantageKit TalonFX(S) Swerve Template
+// 基于 Littleton Robotics AdvantageKit TalonFX(S) Swerve 模板
 // http://github.com/Mechanical-Advantage
 //
-// Use of this source code is governed by a BSD
-// license that can be found in the LICENSE file
-// at the root directory of this project.
+// 本项目源代码受BSD许可证约束，详情请参阅LICENSE文件
 
 package frc.robot;
 
@@ -44,13 +42,12 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
- * subsystems, OI devices, and button mappings) should be declared here.
+ * 这是声明机器人大部分组件的类。由于Command-based是一种"声明式"范式，
+ * 实际上很少有机器人逻辑应该在{@link Robot}的periodic方法中处理（除了调度器调用）。
+ * 相反，机器人的结构（包括子系统、OI设备和按钮映射）应该在这里声明。
  */
 public class RobotContainer {
-  // Subsystems
+  // 子系统
   private final Drive drive;
   // private final Vision vision;
   private final BLinePathFollower blinePathFollower;
@@ -73,19 +70,18 @@ public class RobotContainer {
   // Zone Trigger - 用于命令绑定
   public Trigger inTrenchZoneTrigger;
 
-  // Controller
+  // 控制器
   private final CommandXboxController controller = new CommandXboxController(0);
 
-  // Dashboard inputs
+  // Dashboard输入
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  /** 机器人的容器。包含子系统、OI设备和命令。 */
   public RobotContainer() {
     switch (Constants.currentMode) {
       case REAL:
-        // Real robot, instantiate hardware IO implementations
-        // ModuleIOTalonFX is intended for modules with TalonFX drive, TalonFX turn, and
-        // a CANcoder
+        // 真实机器人，实例化硬件IO实现
+        // ModuleIOTalonFX适用于带有TalonFX驱动、TalonFX转向和CANcoder的模块
         drive =
             new Drive(
                 new GyroIOPigeon2(),
@@ -94,7 +90,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
 
-        // Instantiate vision subsystem with PhotonVision cameras
+        // 使用PhotonVision相机实例化视觉子系统
         // vision =
         //     new Vision(
         //         drive::addVisionMeasurement,
@@ -103,16 +99,16 @@ public class RobotContainer {
         //         new VisionIOPhotonVision(
         //             VisionConstants.camera1Name, VisionConstants.robotToCamera1));
 
-        // Initialize feeder and intake subsystems
+        // 初始化feeder和intake子系统
         // feeder = new FeederSubsystem();
         // intake = new IntakeSubsystem();
 
-        // Initialize shooter subsystem
+        // 初始化shooter子系统
         // shooter = new ShooterSubsystem();
         break;
 
       case SIM:
-        // Sim robot, instantiate physics sim IO implementations
+        // 模拟机器人，实例化物理模拟IO实现
         drive =
             new Drive(
                 new GyroIO() {},
@@ -121,7 +117,7 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
 
-        // Instantiate vision subsystem with simulated cameras
+        // 使用模拟相机实例化视觉子系统
         // vision =
         //     new Vision(
         //         drive::addVisionMeasurement,
@@ -131,16 +127,16 @@ public class RobotContainer {
         //             VisionConstants.camera1Name, VisionConstants.robotToCamera1,
         // drive::getPose));
 
-        // Initialize feeder and intake subsystems
+        // 初始化feeder和intake子系统
         // feeder = new FeederSubsystem();
         // intake = new IntakeSubsystem();
 
-        // Initialize shooter subsystem
+        // 初始化shooter子系统
         // shooter = new ShooterSubsystem();
         break;
 
       default:
-        // Replayed robot, disable IO implementations
+        // 回放机器人，禁用IO实现
         drive =
             new Drive(
                 new GyroIO() {},
@@ -149,26 +145,26 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {});
 
-        // Disable vision in replay mode
+        // 在回放模式下禁用视觉
         // vision = new Vision(drive::addVisionMeasurement);
 
-        // Initialize feeder and intake subsystems
+        // 初始化feeder和intake子系统
         // feeder = new FeederSubsystem();
         // intake = new IntakeSubsystem();
 
-        // Initialize shooter subsystem
+        // 初始化shooter子系统
         // shooter = new ShooterSubsystem();
         break;
     }
 
-    // Register vision subsystem to enable periodic() calls
+    // 注册视觉子系统以启用periodic()调用
     // vision.register();
 
-    // Register feeder and intake subsystems
+    // 注册feeder和intake子系统
     // feeder.register();
     // intake.register();
 
-    // Register shooter subsystem to enable periodic() calls
+    // 注册shooter子系统以启用periodic()调用
     // shooter.register();
 
     // Initialize HoodSubsystem
@@ -198,10 +194,10 @@ public class RobotContainer {
         trenchZone.willContainTranslation(
             turretPoseSupplier, turretFieldSpeedsSupplier, Constants.FieldConstants.DUCK_TIME);
 
-    // Initialize BLine Path Follower subsystem
+    // 初始化BLine路径跟随子系统
     blinePathFollower = new BLinePathFollower(drive);
 
-    // Set up auto routines using PathPlanner
+    // 使用PathPlanner设置自动例程
     autoChooser = new LoggedDashboardChooser<>("Auto Choices");
 
     // 添加PathPlanner"None"选项作为默认（将回退到BLine检查）
@@ -213,7 +209,7 @@ public class RobotContainer {
     // 添加系统选择器（PathPlanner / BLine / None）
     configureSystemChooser();
 
-    // Set up SysId routines
+    // 设置SysId例程
     autoChooser.addOption(
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     autoChooser.addOption(
@@ -229,14 +225,14 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
-    // Configure the button bindings
+    // 配置按钮绑定
     configureButtonBindings();
   }
 
   /** BLine路径选择器 - 在dashboard上显示 */
   private final SendableChooser<String> blinePathChooser = new SendableChooser<>();
 
-  /** Configure BLine auto routines for the chooser */
+  /** 配置选择器的BLine自动例程 */
   private void configureBLineAutoChooser() {
     // 添加默认选项
     blinePathChooser.setDefaultOption("None", "");
@@ -323,13 +319,12 @@ public class RobotContainer {
   }
 
   /**
-   * Use this method to define your button->command mappings. Buttons can be created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
+   * 使用此方法定义按钮到命令的映射。按钮可以通过实例化{@link GenericHID}
+   *或其子类（{@link edu.wpi.first.wpilibj.Joystick}或{@link XboxController}）创建，
+   *然后传递给{@link edu.wpi.first.wpilibj2.command.button.JoystickButton}。
    */
   private void configureButtonBindings() {
-    // Default command, normal field-relative drive
+    // 默认命令，常规场相对驱动
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
@@ -337,7 +332,7 @@ public class RobotContainer {
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
 
-    // Lock to 0° when A button is held
+    // 按住A按钮时锁定到0°
     controller
         .a()
         .whileTrue(
@@ -347,10 +342,10 @@ public class RobotContainer {
                 () -> -controller.getLeftX(),
                 () -> Rotation2d.kZero));
 
-    // Switch to X pattern when X button is pressed
+    // 按下X按钮时切换到X形态
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // Reset gyro to 0° when B button is pressed
+    // 按下B按钮时重置陀螺仪到0°
     controller
         .b()
         .onTrue(
@@ -361,11 +356,11 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    // Y button: Follow example path
+    // Y按钮：跟随示例路径
     // 注意：BLine路径跟随命令应该在自动模式或需要时调用getBLineCommand()方法
     // 这里暂时禁用，因为路径文件需要在运行时加载
 
-    // SysId tests for shooter subsystems
+    // SysId测试用于shooter子系统
     // controller.y().whileTrue(shooter.getHood().sysId());
 
     // Hood自动收回 - 当进入trench区域时收回hood
@@ -376,45 +371,45 @@ public class RobotContainer {
   }
 
   /**
-   * Get the BLinePathFollower subsystem
+   * 获取BLinePathFollower子系统
    *
-   * @return BLinePathFollower instance
+   * @return BLinePathFollower实例
    */
   public BLinePathFollower getBLinePathFollower() {
     return blinePathFollower;
   }
 
   /**
-   * Get the Drive subsystem
+   * 获取Drive子系统
    *
-   * @return Drive instance
+   * @return Drive实例
    */
   public Drive getDrive() {
     return drive;
   }
 
   // /**
-  //  * Get the Feeder subsystem
+  //  * 获取Feeder子系统
   //  *
-  //  * @return FeederSubsystem instance
+  //  * @return FeederSubsystem实例
   //  */
   // public FeederSubsystem getFeeder() {
   //   return feeder;
   // }
 
   // /**
-  //  * Get the Intake subsystem
+  //  * 获取Intake子系统
   //  *
-  //  * @return IntakeSubsystem instance
+  //  * @return IntakeSubsystem实例
   //  */
   // public IntakeSubsystem getIntake() {
   //   return intake;
   // }
 
   /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
+   * 使用此方法将自动命令传递给主{@link Robot}类。
    *
-   * @return the command to run in autonomous
+   * @return 自动模式下运行的命令
    */
   public Command getAutonomousCommand() {
     // 获取选择的系统

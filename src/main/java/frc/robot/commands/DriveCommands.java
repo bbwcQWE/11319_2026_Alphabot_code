@@ -1,12 +1,10 @@
 // Copyright (c) 2025-2026 11319 Polaris
 // https://github.com/bbwcQWE
 //
-// Based on Littleton Robotics AdvantageKit TalonFX(S) Swerve Template
+// 基于 Littleton Robotics AdvantageKit TalonFX(S) Swerve 模板
 // http://github.com/Mechanical-Advantage
 //
-// Use of this source code is governed by a BSD
-// license that can be found in the LICENSE file
-// at the root directory of this project.
+// 本项目源代码受BSD许可证约束，详情请参阅LICENSE文件
 
 package frc.robot.commands;
 

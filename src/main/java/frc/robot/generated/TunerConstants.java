@@ -1,3 +1,9 @@
+/**
+ * Tuner常量 - 由2026 Tuner X Swerve项目生成器自动生成
+ * https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/index.html
+ *
+ * 两组增益都需要针对具体机器人进行调优
+ */
 package frc.robot.generated;
 
 import static edu.wpi.first.units.Units.*;

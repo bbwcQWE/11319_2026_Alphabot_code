@@ -15,17 +15,21 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 
+/**
+ * 发射器子系统 - 控制发射机构
+ * 包含Hood、Turret和FlyWheel三个子模块
+ */
 public class ShooterSubsystem extends SubsystemBase {
 
   @AutoLog
   public static class ShooterStateInputs {
-    public boolean isReady = false;
-    public boolean isAiming = false;
-    public boolean isShooting = false;
-    public double targetDistance = 0;
-    public double hoodAngle = 0;
-    public double turretAngle = 0;
-    public double flywheelSpeed = 0;
+    public boolean isReady = false;      // 是否准备就绪
+    public boolean isAiming = false;     // 是否正在瞄准
+    public boolean isShooting = false;   // 是否正在射击
+    public double targetDistance = 0;    // 目标距离
+    public double hoodAngle = 0;         // Hood角度
+    public double turretAngle = 0;       // 炮塔角度
+    public double flywheelSpeed = 0;     // 飞轮速度
   }
 
   private final ShooterStateInputsAutoLogged shooterStateInputs =
@@ -42,10 +46,10 @@ public class ShooterSubsystem extends SubsystemBase {
   private boolean isShooting = false;
   private double targetDistance = 0;
 
-  private static final double HOOD_MIN_ANGLE = 20.0;
-  private static final double HOOD_MAX_ANGLE = 70.0;
-  private static final double FLYWHEEL_MIN_RPM = 1000.0;
-  private static final double FLYWHEEL_MAX_RPM = 6000.0;
+  private static final double HOOD_MIN_ANGLE = 20.0;    // Hood最小角度
+  private static final double HOOD_MAX_ANGLE = 70.0;    // Hood最大角度
+  private static final double FLYWHEEL_MIN_RPM = 1000.0; // 飞轮最小转速
+  private static final double FLYWHEEL_MAX_RPM = 6000.0; // 飞轮最大转速
 
   private void updateInputs() {
     shooterStateInputs.isReady = isReady;
@@ -59,6 +63,12 @@ public class ShooterSubsystem extends SubsystemBase {
 
   public ShooterSubsystem() {}
 
+  /**
+   * 瞄准目标
+   * @param distance 目标距离（米）
+   * @param targetHeight 目标高度（米）
+   * @return 瞄准命令
+   */
   public Command aimAtTarget(double distance, double targetHeight) {
     isAiming = true;
     Logger.recordOutput("Shooter/TargetDistance", distance);
@@ -83,6 +93,12 @@ public class ShooterSubsystem extends SubsystemBase {
             });
   }
 
+  /**
+   * 根据距离计算射击参数（Hood角度和飞轮转速）
+   * @param distance 目标距离
+   * @param targetHeight 目标高度
+   * @return [hoodAngle, flywheelRPM] 数组
+   */
   private double[] calculateShotParameters(double distance, double targetHeight) {
     double hoodAngle;
     double flywheelRPM;
@@ -119,6 +135,10 @@ public class ShooterSubsystem extends SubsystemBase {
     return new double[] {hoodAngle, flywheelRPM};
   }
 
+  /**
+   * 准备射击 - 加速飞轮到目标速度
+   * @return 准备射击命令
+   */
   public Command prepareToShoot() {
     return flywheel
         .setVelocity(flywheelVelocitySupplier.get())
@@ -130,6 +150,10 @@ public class ShooterSubsystem extends SubsystemBase {
             flywheel);
   }
 
+  /**
+   * 检查是否准备就绪可以射击
+   * @return 是否准备就绪
+   */
   public boolean isReadyToShoot() {
     double currentRPM = flywheel.getVelocity().in(RPM);
     double targetRPM = flywheelVelocitySupplier.get().in(RPM);
@@ -141,6 +165,10 @@ public class ShooterSubsystem extends SubsystemBase {
     return rpmError < 200 && hoodError < 5 && !isShooting;
   }
 
+  /**
+   * 执行射击
+   * @return 射击命令
+   */
   public Command executeShoot() {
     return prepareToShoot()
         .andThen(
@@ -150,10 +178,20 @@ public class ShooterSubsystem extends SubsystemBase {
             });
   }
 
+  /**
+   * 瞄准指定角度
+   * @param hoodAngle Hood目标角度
+   * @param turretAngle 炮塔目标角度
+   * @return 瞄准命令
+   */
   public Command aimAt(Angle hoodAngle, Angle turretAngle) {
     return hood.setAngle(hoodAngle).alongWith(turret.setAngle(turretAngle));
   }
 
+  /**
+   * 运行发射器（使用预设速度）
+   * @return 运行命令
+   */
   public Command runShooter() {
     if (flywheelVelocitySupplier == null) {
       DriverStation.reportWarning("Shooter velocity set to null, not running shooter", true);
@@ -162,10 +200,19 @@ public class ShooterSubsystem extends SubsystemBase {
     return flywheel.setVelocity(flywheelVelocitySupplier.get());
   }
 
+  /**
+   * 停止发射器
+   * @return 停止命令
+   */
   public Command stopShooter() {
     return flywheel.setVelocity(DegreesPerSecond.of(0));
   }
 
+  /**
+   * 运行发射器（指定速度）
+   * @param velocity 指定速度
+   * @return 运行命令
+   */
   public Command runShooter(AngularVelocity velocity) {
     if (velocity == null) {
       DriverStation.reportWarning("Shooter velocity set to null, defaulting to 0", true);
@@ -174,30 +221,58 @@ public class ShooterSubsystem extends SubsystemBase {
     return flywheel.setVelocity(velocity);
   }
 
+  /**
+   * 设置飞轮速度供应器
+   * @param velocitySupplier 速度供应器
+   */
   public void setVelocitySupplier(Supplier<AngularVelocity> velocitySupplier) {
     flywheelVelocitySupplier = velocitySupplier;
   }
 
+  /**
+   * 获取Hood子系统
+   * @return HoodSubsystem实例
+   */
   public HoodSubsystem getHood() {
     return hood;
   }
 
+  /**
+   * 获取炮塔子系统
+   * @return TurretSubsystem实例
+   */
   public TurretSubsystem getTurret() {
     return turret;
   }
 
+  /**
+   * 获取飞轮子系统
+   * @return FlyWheelSubsystem实例
+   */
   public FlyWheelSubsystem getFlywheel() {
     return flywheel;
   }
 
+  /**
+   * 设置准备状态
+   * @param ready 是否准备就绪
+   */
   public void setReady(boolean ready) {
     isReady = ready;
   }
 
+  /**
+   * 设置瞄准状态
+   * @param aiming 是否正在瞄准
+   */
   public void setAiming(boolean aiming) {
     isAiming = aiming;
   }
 
+  /**
+   * 设置射击状态
+   * @param shooting 是否正在射击
+   */
   public void setShooting(boolean shooting) {
     isShooting = shooting;
   }

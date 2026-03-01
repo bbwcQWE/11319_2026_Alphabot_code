@@ -1,3 +1,8 @@
+/**
+ * 区域工具类 - 用于定义和检查机器人场地区域
+ *
+ * <p>提供静态区域检测和基于机器人速度的预测性区域检测
+ */
 package frc.robot.util;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -12,61 +17,58 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * A collection of zone-related classes for defining and checking robot zones on the field.
+ * 区域工具类 - 用于定义和检查机器人场地区域
  *
- * <p>Provides both static zone checking and predictive zone checking based on robot velocity.
+ * <p>提供静态区域检测和基于机器人速度的预测性区域检测
  */
 public class Zones {
 
-  /** Interface for defining a zone that can be checked against a pose. */
+  /** 定义可检查姿态的区域接口 */
   public static interface Zone {
     /**
-     * Checks if the given pose is within this zone.
+     * 检查给定姿态是否在此区域内
      *
-     * @param pose Supplier of the pose to check
-     * @return Trigger that is active when the pose is within the zone
+     * @param pose 要检查的姿态供应器
+     * @return 当姿态在区域内时激活的触发器
      */
     Trigger contains(Supplier<Pose2d> pose);
 
     /**
-     * Checks if the given translation is within this zone.
+     * 检查给定位移是否在此区域内
      *
-     * @param translation Supplier of the translation to check
-     * @return Trigger that is active when the translation is within the zone
+     * @param translation 要检查的位移供应器
+     * @return 当位移在区域内时激活的触发器
      */
     Trigger containsTranslation(Supplier<Translation2d> translation);
   }
 
   /**
-   * Interface for defining a predictive zone that can check if a pose will be within the zone after
-   * a given time delta based on field-relative speeds.
+   * 定义预测性区域接口，可根据场地相对速度检查姿态在给定时间后是否会在区域内
    */
   public static interface PredictiveXZone extends Zone {
     /**
-     * Checks if the pose will be within this zone after the given time delta, accounting for the
-     * robot's field-relative velocity.
+     * 检查姿态在考虑机器人场地相对速度的情况下，给定时间后是否会在此区域内
      *
-     * @param pose Supplier of the current pose
-     * @param fieldSpeeds Supplier of the field-relative chassis speeds
-     * @param dt Time delta to predict ahead
-     * @return Trigger that will be active when the predicted pose is within the zone
+     * @param pose 当前姿态的供应器
+     * @param fieldSpeeds 场地相对底盘速度的供应器
+     * @param dt 预测的时间增量
+     * @return 当预测姿态在区域内时将激活的触发器
      */
     Trigger willContain(Supplier<Pose2d> pose, Supplier<ChassisSpeeds> fieldSpeeds, Time dt);
 
     /**
-     * Checks if the translation will be within this zone after the given time delta, accounting for
-     * the field-relative velocity.
+     * 检查位移在考虑场地相对速度的情况下，给定时间后是否会在此区域内
      *
-     * @param translation Supplier of the current translation
-     * @param fieldSpeeds Supplier of the field-relative chassis speeds
-     * @param dt Time delta to predict ahead
-     * @return Trigger that will be active when the predicted translation is within the zone
+     * @param translation 当前位移的供应器
+     * @param fieldSpeeds 场地相对底盘速度的供应器
+     * @param dt 预测的时间增量
+     * @return 当预测位移在区域内时将激活的触发器
      */
     Trigger willContainTranslation(
         Supplier<Translation2d> translation, Supplier<ChassisSpeeds> fieldSpeeds, Time dt);
   }
 
-  /** Base implementation of a rectangular zone on the field. */
+  /** 场地矩形区域的基础实现 */
   public static class BaseZone implements Zone {
     protected final double xMin;
     protected final double xMax;
@@ -207,30 +209,29 @@ public class Zones {
   }
 
   /**
-   * Predictive implementation of a rectangular zone that can predict future positions based on
-   * field-relative chassis speeds.
+   * 基于场地相对底盘速度预测未来位置的矩形区域预测实现
    */
   public static class PredictiveXBaseZone extends BaseZone implements PredictiveXZone {
 
     /**
-     * Creates a predictive zone with the given bounds.
+     * 使用给定边界创建预测区域
      *
-     * @param xMin Minimum X bound in meters
-     * @param xMax Maximum X bound in meters
-     * @param yMin Minimum Y bound in meters
-     * @param yMax Maximum Y bound in meters
+     * @param xMin 最小X边界（米）
+     * @param xMax 最大X边界（米）
+     * @param yMin 最小Y边界（米）
+     * @param yMax 最大Y边界（米）
      */
     public PredictiveXBaseZone(double xMin, double xMax, double yMin, double yMax) {
       super(xMin, xMax, yMin, yMax);
     }
 
     /**
-     * Creates a predictive zone with the given bounds using Distance units.
+     * 使用距离单位创建预测区域
      *
-     * @param xMin Minimum X bound
-     * @param xMax Maximum X bound
-     * @param yMin Minimum Y bound
-     * @param yMax Maximum Y bound
+     * @param xMin 最小X边界
+     * @param xMax 最大X边界
+     * @param yMin 最小Y边界
+     * @param yMax 最大Y边界
      */
     public PredictiveXBaseZone(Distance xMin, Distance xMax, Distance yMin, Distance yMax) {
       super(xMin, xMax, yMin, yMax);
@@ -305,17 +306,16 @@ public class Zones {
   }
 
   /**
-   * A collection of zones that treats them as a single zone using OR logic. If any zone contains
-   * the pose, the collection contains the pose.
+   * 使用OR逻辑将多个区域视为单个区域的区域集合。如果任何区域包含该姿态，则集合包含该姿态。
    */
   public static class ZoneCollection implements Zone {
     private final List<Zone> zones = new ArrayList<>();
 
     /**
-     * Adds a zone to this collection.
+     * 添加区域到此集合
      *
-     * @param zone Zone to add
-     * @return This collection for chaining
+     * @param zone 要添加的区域
+     * @return 此集合用于链式调用
      */
     public ZoneCollection add(Zone zone) {
       zones.add(zone);
@@ -359,16 +359,15 @@ public class Zones {
   }
 
   /**
-   * A collection of predictive zones that treats them as a single predictive zone using OR logic.
-   * If any zone will contain the predicted pose, the collection will contain the pose.
+   * 使用OR逻辑将多个预测区域视为单个预测区域的预测区域集合。如果任何区域将包含预测的姿态，则集合将包含该姿态。
    */
   public static class PredictiveXZoneCollection extends ZoneCollection implements PredictiveXZone {
 
     /**
-     * Adds a predictive zone to this collection.
+     * 添加预测区域到此集合
      *
-     * @param zone Predictive zone to add
-     * @return This collection for chaining
+     * @param zone 要添加的预测区域
+     * @return 此集合用于链式调用
      */
     public PredictiveXZoneCollection add(PredictiveXZone zone) {
       super.add(zone);

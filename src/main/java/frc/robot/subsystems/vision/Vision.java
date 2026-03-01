@@ -1,10 +1,7 @@
-// Copyright (c) 2021-2026 Littleton Robotics
-// http://github.com/Mechanical-Advantage
-//
-// Use of this source code is governed by a BSD
-// license that can be found in the LICENSE file
-// at the root directory of this project.
-
+/**
+ * 视觉子系统 - 处理相机数据并进行姿态估计
+ * 支持多相机、AprilTag识别、视觉里程计融合
+ */
 package frc.robot.subsystems.vision;
 
 import static frc.robot.subsystems.vision.VisionConstants.*;
@@ -24,35 +21,44 @@ import java.util.LinkedList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
+/**
+ * 视觉子系统 - 处理相机数据并进行姿态估计
+ */
 public class Vision extends SubsystemBase {
   private final VisionConsumer consumer;
   private final VisionIO[] io;
   private final VisionIOInputsAutoLogged[] inputs;
   private final Alert[] disconnectedAlerts;
 
+  /**
+   * 构造函数
+   * @param consumer 视觉数据消费者（通常是Drive子系统）
+   * @param io 可变数量的VisionIO实现
+   */
   public Vision(VisionConsumer consumer, VisionIO... io) {
     this.consumer = consumer;
     this.io = io;
 
-    // Initialize inputs
+    // 初始化输入
     this.inputs = new VisionIOInputsAutoLogged[io.length];
     for (int i = 0; i < inputs.length; i++) {
       inputs[i] = new VisionIOInputsAutoLogged();
     }
 
-    // Initialize disconnected alerts
+    // 初始化断开连接警报
     this.disconnectedAlerts = new Alert[io.length];
     for (int i = 0; i < inputs.length; i++) {
       disconnectedAlerts[i] =
           new Alert(
-              "Vision camera " + Integer.toString(i) + " is disconnected.", AlertType.kWarning);
+              "视觉相机 " + Integer.toString(i) + " 已断开连接。", AlertType.kWarning);
     }
   }
 
   /**
-   * Returns the X angle to the best target, which can be used for simple servoing with vision.
+   * 获取最佳目标的X角度，可用于简单的视觉伺服
    *
-   * @param cameraIndex The index of the camera to use.
+   * @param cameraIndex 使用的相机索引
+   * @return 目标X角度
    */
   public Rotation2d getTargetX(int cameraIndex) {
     return inputs[cameraIndex].latestTargetObservation.tx();
@@ -65,24 +71,24 @@ public class Vision extends SubsystemBase {
       Logger.processInputs("Vision/Camera" + Integer.toString(i), inputs[i]);
     }
 
-    // Initialize logging values
+    // 初始化日志值
     List<Pose3d> allTagPoses = new LinkedList<>();
     List<Pose3d> allRobotPoses = new LinkedList<>();
     List<Pose3d> allRobotPosesAccepted = new LinkedList<>();
     List<Pose3d> allRobotPosesRejected = new LinkedList<>();
 
-    // Loop over cameras
+    // 遍历所有相机
     for (int cameraIndex = 0; cameraIndex < io.length; cameraIndex++) {
-      // Update disconnected alert
+      // 更新断开连接警报
       disconnectedAlerts[cameraIndex].set(!inputs[cameraIndex].connected);
 
-      // Initialize logging values
+      // 初始化日志值
       List<Pose3d> tagPoses = new LinkedList<>();
       List<Pose3d> robotPoses = new LinkedList<>();
       List<Pose3d> robotPosesAccepted = new LinkedList<>();
       List<Pose3d> robotPosesRejected = new LinkedList<>();
 
-      // Add tag poses
+      // 添加AprilTag位置
       for (int tagId : inputs[cameraIndex].tagIds) {
         var tagPose = aprilTagLayout.getTagPose(tagId);
         if (tagPose.isPresent()) {
@@ -90,23 +96,23 @@ public class Vision extends SubsystemBase {
         }
       }
 
-      // Loop over pose observations
+      // 遍历姿态观测
       for (var observation : inputs[cameraIndex].poseObservations) {
-        // Check whether to reject pose
+        // 检查是否拒绝该姿态
         boolean rejectPose =
-            observation.tagCount() == 0 // Must have at least one tag
+            observation.tagCount() == 0 // 至少需要一个标签
                 || (observation.tagCount() == 1
-                    && observation.ambiguity() > maxAmbiguity) // Cannot be high ambiguity
+                    && observation.ambiguity() > maxAmbiguity) // 不能有高歧义度
                 || Math.abs(observation.pose().getZ())
-                    > maxZError // Must have realistic Z coordinate
+                    > maxZError // Z坐标必须合理
 
-                // Must be within the field boundaries
+                // 必须在场地边界内
                 || observation.pose().getX() < 0.0
                 || observation.pose().getX() > aprilTagLayout.getFieldLength()
                 || observation.pose().getY() < 0.0
                 || observation.pose().getY() > aprilTagLayout.getFieldWidth();
 
-        // Add pose to log
+        // 添加姿态到日志
         robotPoses.add(observation.pose());
         if (rejectPose) {
           robotPosesRejected.add(observation.pose());
@@ -114,12 +120,12 @@ public class Vision extends SubsystemBase {
           robotPosesAccepted.add(observation.pose());
         }
 
-        // Skip if rejected
+        // 如果被拒绝则跳过
         if (rejectPose) {
           continue;
         }
 
-        // Calculate standard deviations
+        // 计算标准差
         double stdDevFactor =
             Math.pow(observation.averageTagDistance(), 2.0) / observation.tagCount();
         double linearStdDev = linearStdDevBaseline * stdDevFactor;
@@ -133,14 +139,14 @@ public class Vision extends SubsystemBase {
           angularStdDev *= cameraStdDevFactors[cameraIndex];
         }
 
-        // Send vision observation
+        // 发送视觉观测到消费者
         consumer.accept(
             observation.pose().toPose2d(),
             observation.timestamp(),
             VecBuilder.fill(linearStdDev, linearStdDev, angularStdDev));
       }
 
-      // Log camera metadata
+      // 记录相机元数据
       Logger.recordOutput(
           "Vision/Camera" + Integer.toString(cameraIndex) + "/TagPoses",
           tagPoses.toArray(new Pose3d[0]));
@@ -159,7 +165,7 @@ public class Vision extends SubsystemBase {
       allRobotPosesRejected.addAll(robotPosesRejected);
     }
 
-    // Log summary data
+    // 记录汇总数据
     Logger.recordOutput("Vision/Summary/TagPoses", allTagPoses.toArray(new Pose3d[0]));
     Logger.recordOutput("Vision/Summary/RobotPoses", allRobotPoses.toArray(new Pose3d[0]));
     Logger.recordOutput(
@@ -168,8 +174,18 @@ public class Vision extends SubsystemBase {
         "Vision/Summary/RobotPosesRejected", allRobotPosesRejected.toArray(new Pose3d[0]));
   }
 
+  /**
+   * 视觉数据消费者接口
+   * 用于接收处理后的视觉姿态数据
+   */
   @FunctionalInterface
   public static interface VisionConsumer {
+    /**
+     * 接收视觉姿态数据
+     * @param visionRobotPoseMeters 机器人姿态（米）
+     * @param timestampSeconds 时间戳（秒）
+     * @param visionMeasurementStdDevs 测量标准差
+     */
     public void accept(
         Pose2d visionRobotPoseMeters,
         double timestampSeconds,

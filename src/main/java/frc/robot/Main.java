@@ -1,29 +1,26 @@
 // Copyright (c) 2025-2026 11319 Polaris
 // https://github.com/bbwcQWE
 //
-// Based on Littleton Robotics AdvantageKit TalonFX(S) Swerve Template
+// 基于 Littleton Robotics AdvantageKit TalonFX(S) Swerve 模板
 // http://github.com/Mechanical-Advantage
 //
-// Use of this source code is governed by a BSD
-// license that can be found in the LICENSE file
-// at the root directory of this project.
+// 本项目源代码受BSD许可证约束，详情请参阅LICENSE文件
 
 package frc.robot;
 
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
- * Do NOT add any static variables to this class, or any initialization at all. Unless you know what
- * you are doing, do not modify this file except to change the parameter class to the startRobot
- * call.
+ * 请勿在此类中添加任何静态变量，或进行任何初始化。除非您知道自己在做什么，
+ * 请勿修改此文件，除非需要更改startRobot调用中的参数类。
  */
 public final class Main {
   private Main() {}
 
   /**
-   * Main initialization function. Do not perform any initialization here.
+   * 主初始化函数。请勿在此处执行任何初始化操作。
    *
-   * <p>If you change your main robot class, change the parameter type.
+   * <p>如果更改了主机器人类，请更改参数类型。
    */
   public static void main(String... args) {
     RobotBase.startRobot(Robot::new);
