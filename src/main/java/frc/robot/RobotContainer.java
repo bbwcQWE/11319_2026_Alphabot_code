@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -30,30 +31,29 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.feeder.FeederSubsystem;
+import frc.robot.subsystems.intake.IntakeSubsystem;
 import frc.robot.subsystems.shooter.HoodSubsystem;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionConstants;
+import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.Zones;
-// import frc.robot.subsystems.feeder.FeederSubsystem;
-// import frc.robot.subsystems.intake.IntakeSubsystem;
-// import frc.robot.subsystems.vision.Vision;
-// import frc.robot.subsystems.vision.VisionConstants;
-// import frc.robot.subsystems.vision.VisionIOPhotonVision;
-// import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
- * 这是声明机器人大部分组件的类。由于Command-based是一种"声明式"范式，
- * 实际上很少有机器人逻辑应该在{@link Robot}的periodic方法中处理（除了调度器调用）。
+ * 这是声明机器人大部分组件的类。由于Command-based是一种"声明式"范式， 实际上很少有机器人逻辑应该在{@link Robot}的periodic方法中处理（除了调度器调用）。
  * 相反，机器人的结构（包括子系统、OI设备和按钮映射）应该在这里声明。
  */
 public class RobotContainer {
   // 子系统
   private final Drive drive;
-  // private final Vision vision;
+  private final Vision vision;
   private final BLinePathFollower blinePathFollower;
   private HoodSubsystem hood;
-  // private final FeederSubsystem feeder;
-  // private final IntakeSubsystem intake;
+  private final FeederSubsystem feeder;
+  private final IntakeSubsystem intake;
   // private final ShooterSubsystem shooter;
 
   // Zone相关的Suppliers - 在构造函数中初始化
@@ -71,7 +71,11 @@ public class RobotContainer {
   public Trigger inTrenchZoneTrigger;
 
   // 控制器
-  private final CommandXboxController controller = new CommandXboxController(0);
+  // 主控制器(插槽0) - 驾驶员控制驱动
+  private final CommandXboxController mainController = new CommandXboxController(0);
+
+  // 操作控制器(插槽1) - 操作手柄控制(如取消自动、特殊功能)
+  private final CommandXboxController operatorController = new CommandXboxController(1);
 
   // Dashboard输入
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -91,17 +95,17 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackRight));
 
         // 使用PhotonVision相机实例化视觉子系统
-        // vision =
-        //     new Vision(
-        //         drive::addVisionMeasurement,
-        //         new VisionIOPhotonVision(
-        //             VisionConstants.camera0Name, VisionConstants.robotToCamera0),
-        //         new VisionIOPhotonVision(
-        //             VisionConstants.camera1Name, VisionConstants.robotToCamera1));
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOPhotonVision(
+                    VisionConstants.camera0Name, VisionConstants.robotToCamera0),
+                new VisionIOPhotonVision(
+                    VisionConstants.camera1Name, VisionConstants.robotToCamera1));
 
         // 初始化feeder和intake子系统
-        // feeder = new FeederSubsystem();
-        // intake = new IntakeSubsystem();
+        feeder = new FeederSubsystem();
+        intake = new IntakeSubsystem();
 
         // 初始化shooter子系统
         // shooter = new ShooterSubsystem();
@@ -118,18 +122,17 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackRight));
 
         // 使用模拟相机实例化视觉子系统
-        // vision =
-        //     new Vision(
-        //         drive::addVisionMeasurement,
-        //         new VisionIOPhotonVisionSim(
-        //             VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose),
-        //         new VisionIOPhotonVisionSim(
-        //             VisionConstants.camera1Name, VisionConstants.robotToCamera1,
-        // drive::getPose));
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOPhotonVisionSim(
+                    VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose),
+                new VisionIOPhotonVisionSim(
+                    VisionConstants.camera1Name, VisionConstants.robotToCamera1, drive::getPose));
 
         // 初始化feeder和intake子系统
-        // feeder = new FeederSubsystem();
-        // intake = new IntakeSubsystem();
+        feeder = new FeederSubsystem();
+        intake = new IntakeSubsystem();
 
         // 初始化shooter子系统
         // shooter = new ShooterSubsystem();
@@ -146,11 +149,11 @@ public class RobotContainer {
                 new ModuleIO() {});
 
         // 在回放模式下禁用视觉
-        // vision = new Vision(drive::addVisionMeasurement);
+        vision = new Vision(drive::addVisionMeasurement);
 
         // 初始化feeder和intake子系统
-        // feeder = new FeederSubsystem();
-        // intake = new IntakeSubsystem();
+        feeder = new FeederSubsystem();
+        intake = new IntakeSubsystem();
 
         // 初始化shooter子系统
         // shooter = new ShooterSubsystem();
@@ -158,11 +161,11 @@ public class RobotContainer {
     }
 
     // 注册视觉子系统以启用periodic()调用
-    // vision.register();
+    vision.register();
 
     // 注册feeder和intake子系统
-    // feeder.register();
-    // intake.register();
+    feeder.register();
+    intake.register();
 
     // 注册shooter子系统以启用periodic()调用
     // shooter.register();
@@ -319,34 +322,43 @@ public class RobotContainer {
   }
 
   /**
-   * 使用此方法定义按钮到命令的映射。按钮可以通过实例化{@link GenericHID}
-   *或其子类（{@link edu.wpi.first.wpilibj.Joystick}或{@link XboxController}）创建，
-   *然后传递给{@link edu.wpi.first.wpilibj2.command.button.JoystickButton}。
+   * 使用此方法定义按钮到命令的映射。按钮可以通过实例化{@link GenericHID} 或其子类（{@link edu.wpi.first.wpilibj.Joystick}或{@link
+   * XboxController}）创建， 然后传递给{@link edu.wpi.first.wpilibj2.command.button.JoystickButton}。
    */
   private void configureButtonBindings() {
     // 默认命令，常规场相对驱动
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () -> -mainController.getLeftY(),
+            () -> -mainController.getLeftX(),
+            () -> -mainController.getRightX()));
 
     // 按住A按钮时锁定到0°
-    controller
+    mainController
         .a()
         .whileTrue(
             DriveCommands.joystickDriveAtAngle(
                 drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
+                () -> -mainController.getLeftY(),
+                () -> -mainController.getLeftX(),
                 () -> Rotation2d.kZero));
 
+    // 按住Y按钮时锁定到45度方向
+    mainController
+        .y()
+        .whileTrue(
+            DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -mainController.getLeftY(),
+                () -> -mainController.getLeftX(),
+                () -> Rotation2d.fromDegrees(45)));
+
     // 按下X按钮时切换到X形态
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    mainController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // 按下B按钮时重置陀螺仪到0°
-    controller
+    mainController
         .b()
         .onTrue(
             Commands.runOnce(
@@ -355,6 +367,71 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
+
+    // ==================== BLine 自动中断功能 ====================
+    // 主手柄左摇杆 - 当驾驶员实际移动摇杆时（超过阈值）取消自动并切换到手动驾驶
+    // 使用Trigger检测摇杆是否超过阈值（0.2），只有故意的操作才会触发
+    new Trigger(
+            () -> {
+              double leftY = Math.abs(mainController.getLeftY());
+              double leftX = Math.abs(mainController.getLeftX());
+              // 超过0.2阈值才认为是"打杆"操作
+              return leftY > 0.2 || leftX > 0.2;
+            })
+        .whileTrue(
+            Commands.run(
+                () -> {
+                  // 取消所有正在执行的自动命令（包括BLine路径跟随）
+                  CommandScheduler.getInstance().cancelAll();
+
+                  // 手动驾驶由默认命令处理，这里只需要取消自动命令
+                  // 当Trigger条件满足时，WPILib会自动使用默认命令
+                },
+                drive));
+
+    // ==================== BLine 自动中断功能 (操作控制器) ====================
+    // 使用操作手柄(插槽1)上的按钮来取消自动命令
+    // 这样不会与驾驶员的驱动控制冲突
+
+    // 操作手柄左肩键(LB) - 取消所有自动命令并停止
+    operatorController
+        .leftBumper()
+        .onTrue(
+            Commands.run(
+                () -> {
+                  // 取消所有自动命令
+                  CommandScheduler.getInstance().cancelAll();
+                  // 停止驱动
+                  drive.stop();
+                  System.out.println("[BLine] Auto command cancelled by operator");
+                },
+                drive));
+
+    // 操作手柄右肩键(RB) - 紧急停止，锁定模块
+    operatorController
+        .rightBumper()
+        .onTrue(
+            Commands.run(
+                () -> {
+                  // 取消所有自动命令
+                  CommandScheduler.getInstance().cancelAll();
+                  // 锁定模块（X形态）
+                  drive.stopWithX();
+                  System.out.println("[BLine] Emergency stop activated - X formation");
+                },
+                drive));
+
+    // 操作手柄A按钮 - 取消自动并切换到手动驾驶
+    operatorController
+        .a()
+        .onTrue(
+            Commands.run(
+                () -> {
+                  // 取消所有自动命令
+                  CommandScheduler.getInstance().cancelAll();
+                  System.out.println("[BLine] Switched to manual control");
+                },
+                drive));
 
     // Y按钮：跟随示例路径
     // 注意：BLine路径跟随命令应该在自动模式或需要时调用getBLineCommand()方法

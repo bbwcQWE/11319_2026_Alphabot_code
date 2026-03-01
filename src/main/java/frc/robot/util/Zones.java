@@ -42,9 +42,7 @@ public class Zones {
     Trigger containsTranslation(Supplier<Translation2d> translation);
   }
 
-  /**
-   * 定义预测性区域接口，可根据场地相对速度检查姿态在给定时间后是否会在区域内
-   */
+  /** 定义预测性区域接口，可根据场地相对速度检查姿态在给定时间后是否会在区域内 */
   public static interface PredictiveXZone extends Zone {
     /**
      * 检查姿态在考虑机器人场地相对速度的情况下，给定时间后是否会在此区域内
@@ -208,9 +206,7 @@ public class Zones {
     }
   }
 
-  /**
-   * 基于场地相对底盘速度预测未来位置的矩形区域预测实现
-   */
+  /** 基于场地相对底盘速度预测未来位置的矩形区域预测实现 */
   public static class PredictiveXBaseZone extends BaseZone implements PredictiveXZone {
 
     /**
@@ -305,9 +301,7 @@ public class Zones {
     }
   }
 
-  /**
-   * 使用OR逻辑将多个区域视为单个区域的区域集合。如果任何区域包含该姿态，则集合包含该姿态。
-   */
+  /** 使用OR逻辑将多个区域视为单个区域的区域集合。如果任何区域包含该姿态，则集合包含该姿态。 */
   public static class ZoneCollection implements Zone {
     private final List<Zone> zones = new ArrayList<>();
 
@@ -358,9 +352,7 @@ public class Zones {
     }
   }
 
-  /**
-   * 使用OR逻辑将多个预测区域视为单个预测区域的预测区域集合。如果任何区域将包含预测的姿态，则集合将包含该姿态。
-   */
+  /** 使用OR逻辑将多个预测区域视为单个预测区域的预测区域集合。如果任何区域将包含预测的姿态，则集合将包含该姿态。 */
   public static class PredictiveXZoneCollection extends ZoneCollection implements PredictiveXZone {
 
     /**

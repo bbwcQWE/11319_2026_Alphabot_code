@@ -1,6 +1,4 @@
-/**
- * 视觉常量 - 配置视觉子系统的参数
- */
+/** 视觉常量 - 配置视觉子系统的参数 */
 package frc.robot.subsystems.vision;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -8,9 +6,7 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 
-/**
- * 视觉常量 - 配置视觉子系统的参数
- */
+/** 视觉常量 - 配置视觉子系统的参数 */
 public class VisionConstants {
   // AprilTag场地布局
   public static AprilTagFieldLayout aprilTagLayout =
@@ -28,8 +24,8 @@ public class VisionConstants {
       new Transform3d(-0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, Math.PI));
 
   // 基本过滤阈值
-  public static double maxAmbiguity = 0.3;    // 最大歧义度
-  public static double maxZError = 0.75;       // 最大Z轴误差
+  public static double maxAmbiguity = 0.3; // 最大歧义度
+  public static double maxZError = 0.75; // 最大Z轴误差
 
   // 标准差基线（1米距离和1个标签）
   // （根据距离和标签数量自动调整）
@@ -41,11 +37,10 @@ public class VisionConstants {
   public static double[] cameraStdDevFactors =
       new double[] {
         1.0, // 相机 0
-        1.0  // 相机 1
+        1.0 // 相机 1
       };
 
   // MegaTag 2观测的乘数
   public static double linearStdDevMegatag2Factor = 0.5; // 比完整3D解算更稳定
-  public static double angularStdDevMegatag2Factor =
-      Double.POSITIVE_INFINITY; // 无旋转数据
+  public static double angularStdDevMegatag2Factor = Double.POSITIVE_INFINITY; // 无旋转数据
 }

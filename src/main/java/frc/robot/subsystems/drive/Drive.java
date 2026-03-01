@@ -36,10 +36,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-/**
- * 驱动子系统 - 控制Swerve底盘
- * 提供场相对驾驶、里程计估计、视觉融合等功能
- */
+/** 驱动子系统 - 控制Swerve底盘 提供场相对驾驶、里程计估计、视觉融合等功能 */
 public class Drive extends SubsystemBase {
   // TunerConstants不包含这些常量，因此在这里本地声明
   static final double ODOMETRY_FREQUENCY = TunerConstants.kCANBus.isNetworkFD() ? 250.0 : 100.0;
@@ -57,8 +54,7 @@ public class Drive extends SubsystemBase {
   private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   private final Module[] modules = new Module[4]; // FL, FR, BL, BR
   private final SysIdRoutine sysId;
-  private final Alert gyroDisconnectedAlert =
-      new Alert("陀螺仪已断开，使用运动学作为后备方案", AlertType.kError);
+  private final Alert gyroDisconnectedAlert = new Alert("陀螺仪已断开，使用运动学作为后备方案", AlertType.kError);
 
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
   private Rotation2d rawGyroRotation = Rotation2d.kZero;
@@ -126,8 +122,7 @@ public class Drive extends SubsystemBase {
     }
 
     // 更新里程计
-    double[] sampleTimestamps =
-        modules[0].getOdometryTimestamps(); // 所有信号一起采样
+    double[] sampleTimestamps = modules[0].getOdometryTimestamps(); // 所有信号一起采样
     int sampleCount = sampleTimestamps.length;
     for (int i = 0; i < sampleCount; i++) {
       // 从每个模块读取轮位置和增量
@@ -197,10 +192,7 @@ public class Drive extends SubsystemBase {
     runVelocity(new ChassisSpeeds());
   }
 
-  /**
-   * 停止驱动并将模块转动到X形态以阻止移动。
-   * 下次请求非零速度时，模块将恢复到正常方向。
-   */
+  /** 停止驱动并将模块转动到X形态以阻止移动。 下次请求非零速度时，模块将恢复到正常方向。 */
   public void stopWithX() {
     Rotation2d[] headings = new Rotation2d[4];
     for (int i = 0; i < 4; i++) {
@@ -211,8 +203,7 @@ public class Drive extends SubsystemBase {
   }
 
   /**
-   * 将所有模块方向设置为指定的旋转。
-   * 用于自动开始前预置Swerve模块方向。
+   * 将所有模块方向设置为指定的旋转。 用于自动开始前预置Swerve模块方向。
    *
    * @param orientation 所有模块设置的旋转角度
    */

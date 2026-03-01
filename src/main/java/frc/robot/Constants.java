@@ -19,8 +19,7 @@ import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
- * 定义AdvantageKit运行时模式的类。在roboRIO上运行时模式始终为"real"。
- * 修改"simMode"的值可在"sim"（物理模拟）和"replay"（从文件回放日志）之间切换。
+ * 定义AdvantageKit运行时模式的类。在roboRIO上运行时模式始终为"real"。 修改"simMode"的值可在"sim"（物理模拟）和"replay"（从文件回放日志）之间切换。
  */
 public final class Constants {
   public static final Mode simMode = Mode.SIM;

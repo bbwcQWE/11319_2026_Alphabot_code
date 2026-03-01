@@ -17,10 +17,7 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
-/**
- * 虚拟机配置为自动运行此类，并按照TimedRobot文档中的描述调用各模式对应的函数。
- * 如果在创建此项目后更改了此类名或包名，还必须更新build.gradle文件。
- */
+/** 虚拟机配置为自动运行此类，并按照TimedRobot文档中的描述调用各模式对应的函数。 如果在创建此项目后更改了此类名或包名，还必须更新build.gradle文件。 */
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;

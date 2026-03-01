@@ -10,10 +10,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.RobotBase;
 
-/**
- * 请勿在此类中添加任何静态变量，或进行任何初始化。除非您知道自己在做什么，
- * 请勿修改此文件，除非需要更改startRobot调用中的参数类。
- */
+/** 请勿在此类中添加任何静态变量，或进行任何初始化。除非您知道自己在做什么， 请勿修改此文件，除非需要更改startRobot调用中的参数类。 */
 public final class Main {
   private Main() {}
 

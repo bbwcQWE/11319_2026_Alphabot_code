@@ -1,7 +1,4 @@
-/**
- * 视觉子系统 - 处理相机数据并进行姿态估计
- * 支持多相机、AprilTag识别、视觉里程计融合
- */
+/** 视觉子系统 - 处理相机数据并进行姿态估计 支持多相机、AprilTag识别、视觉里程计融合 */
 package frc.robot.subsystems.vision;
 
 import static frc.robot.subsystems.vision.VisionConstants.*;
@@ -21,9 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import org.littletonrobotics.junction.Logger;
 
-/**
- * 视觉子系统 - 处理相机数据并进行姿态估计
- */
+/** 视觉子系统 - 处理相机数据并进行姿态估计 */
 public class Vision extends SubsystemBase {
   private final VisionConsumer consumer;
   private final VisionIO[] io;
@@ -32,6 +27,7 @@ public class Vision extends SubsystemBase {
 
   /**
    * 构造函数
+   *
    * @param consumer 视觉数据消费者（通常是Drive子系统）
    * @param io 可变数量的VisionIO实现
    */
@@ -49,8 +45,7 @@ public class Vision extends SubsystemBase {
     this.disconnectedAlerts = new Alert[io.length];
     for (int i = 0; i < inputs.length; i++) {
       disconnectedAlerts[i] =
-          new Alert(
-              "视觉相机 " + Integer.toString(i) + " 已断开连接。", AlertType.kWarning);
+          new Alert("视觉相机 " + Integer.toString(i) + " 已断开连接。", AlertType.kWarning);
     }
   }
 
@@ -103,8 +98,7 @@ public class Vision extends SubsystemBase {
             observation.tagCount() == 0 // 至少需要一个标签
                 || (observation.tagCount() == 1
                     && observation.ambiguity() > maxAmbiguity) // 不能有高歧义度
-                || Math.abs(observation.pose().getZ())
-                    > maxZError // Z坐标必须合理
+                || Math.abs(observation.pose().getZ()) > maxZError // Z坐标必须合理
 
                 // 必须在场地边界内
                 || observation.pose().getX() < 0.0
@@ -174,14 +168,12 @@ public class Vision extends SubsystemBase {
         "Vision/Summary/RobotPosesRejected", allRobotPosesRejected.toArray(new Pose3d[0]));
   }
 
-  /**
-   * 视觉数据消费者接口
-   * 用于接收处理后的视觉姿态数据
-   */
+  /** 视觉数据消费者接口 用于接收处理后的视觉姿态数据 */
   @FunctionalInterface
   public static interface VisionConsumer {
     /**
      * 接收视觉姿态数据
+     *
      * @param visionRobotPoseMeters 机器人姿态（米）
      * @param timestampSeconds 时间戳（秒）
      * @param visionMeasurementStdDevs 测量标准差

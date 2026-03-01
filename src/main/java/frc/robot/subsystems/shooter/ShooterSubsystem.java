@@ -15,21 +15,18 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 
-/**
- * 发射器子系统 - 控制发射机构
- * 包含Hood、Turret和FlyWheel三个子模块
- */
+/** 发射器子系统 - 控制发射机构 包含Hood、Turret和FlyWheel三个子模块 */
 public class ShooterSubsystem extends SubsystemBase {
 
   @AutoLog
   public static class ShooterStateInputs {
-    public boolean isReady = false;      // 是否准备就绪
-    public boolean isAiming = false;     // 是否正在瞄准
-    public boolean isShooting = false;   // 是否正在射击
-    public double targetDistance = 0;    // 目标距离
-    public double hoodAngle = 0;         // Hood角度
-    public double turretAngle = 0;       // 炮塔角度
-    public double flywheelSpeed = 0;     // 飞轮速度
+    public boolean isReady = false; // 是否准备就绪
+    public boolean isAiming = false; // 是否正在瞄准
+    public boolean isShooting = false; // 是否正在射击
+    public double targetDistance = 0; // 目标距离
+    public double hoodAngle = 0; // Hood角度
+    public double turretAngle = 0; // 炮塔角度
+    public double flywheelSpeed = 0; // 飞轮速度
   }
 
   private final ShooterStateInputsAutoLogged shooterStateInputs =
@@ -46,8 +43,8 @@ public class ShooterSubsystem extends SubsystemBase {
   private boolean isShooting = false;
   private double targetDistance = 0;
 
-  private static final double HOOD_MIN_ANGLE = 20.0;    // Hood最小角度
-  private static final double HOOD_MAX_ANGLE = 70.0;    // Hood最大角度
+  private static final double HOOD_MIN_ANGLE = 20.0; // Hood最小角度
+  private static final double HOOD_MAX_ANGLE = 70.0; // Hood最大角度
   private static final double FLYWHEEL_MIN_RPM = 1000.0; // 飞轮最小转速
   private static final double FLYWHEEL_MAX_RPM = 6000.0; // 飞轮最大转速
 
@@ -65,6 +62,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   /**
    * 瞄准目标
+   *
    * @param distance 目标距离（米）
    * @param targetHeight 目标高度（米）
    * @return 瞄准命令
@@ -95,6 +93,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   /**
    * 根据距离计算射击参数（Hood角度和飞轮转速）
+   *
    * @param distance 目标距离
    * @param targetHeight 目标高度
    * @return [hoodAngle, flywheelRPM] 数组
@@ -137,6 +136,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   /**
    * 准备射击 - 加速飞轮到目标速度
+   *
    * @return 准备射击命令
    */
   public Command prepareToShoot() {
@@ -152,6 +152,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   /**
    * 检查是否准备就绪可以射击
+   *
    * @return 是否准备就绪
    */
   public boolean isReadyToShoot() {
@@ -167,6 +168,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   /**
    * 执行射击
+   *
    * @return 射击命令
    */
   public Command executeShoot() {
@@ -180,6 +182,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   /**
    * 瞄准指定角度
+   *
    * @param hoodAngle Hood目标角度
    * @param turretAngle 炮塔目标角度
    * @return 瞄准命令
@@ -190,6 +193,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   /**
    * 运行发射器（使用预设速度）
+   *
    * @return 运行命令
    */
   public Command runShooter() {
@@ -202,6 +206,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   /**
    * 停止发射器
+   *
    * @return 停止命令
    */
   public Command stopShooter() {
@@ -210,6 +215,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   /**
    * 运行发射器（指定速度）
+   *
    * @param velocity 指定速度
    * @return 运行命令
    */
@@ -223,6 +229,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   /**
    * 设置飞轮速度供应器
+   *
    * @param velocitySupplier 速度供应器
    */
   public void setVelocitySupplier(Supplier<AngularVelocity> velocitySupplier) {
@@ -231,6 +238,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   /**
    * 获取Hood子系统
+   *
    * @return HoodSubsystem实例
    */
   public HoodSubsystem getHood() {
@@ -239,6 +247,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   /**
    * 获取炮塔子系统
+   *
    * @return TurretSubsystem实例
    */
   public TurretSubsystem getTurret() {
@@ -247,6 +256,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   /**
    * 获取飞轮子系统
+   *
    * @return FlyWheelSubsystem实例
    */
   public FlyWheelSubsystem getFlywheel() {
@@ -255,6 +265,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   /**
    * 设置准备状态
+   *
    * @param ready 是否准备就绪
    */
   public void setReady(boolean ready) {
@@ -263,6 +274,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   /**
    * 设置瞄准状态
+   *
    * @param aiming 是否正在瞄准
    */
   public void setAiming(boolean aiming) {
@@ -271,6 +283,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
   /**
    * 设置射击状态
+   *
    * @param shooting 是否正在射击
    */
   public void setShooting(boolean shooting) {
