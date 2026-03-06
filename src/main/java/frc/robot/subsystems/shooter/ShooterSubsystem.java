@@ -8,12 +8,14 @@ import static edu.wpi.first.units.Units.RPM;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.DistanceUtils;
+import frc.robot.Constants;
+import frc.robot.subsystems.drive.Drive;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
@@ -38,18 +40,28 @@ public class ShooterSubsystem extends SubsystemBase {
   private final HoodSubsystem hood = new HoodSubsystem();
   private final TurretSubsystem turret = new TurretSubsystem();
   private final FlyWheelSubsystem flywheel = new FlyWheelSubsystem();
+  private final SOTMCalculator sotmCalculator = SOTMCalculator.getInstance();
 
   private Supplier<AngularVelocity> flywheelVelocitySupplier = () -> DegreesPerSecond.of(0);
 
   private boolean isReady = false;
   private boolean isAiming = false;
   private boolean isShooting = false;
+  private boolean isSOTMEnabled = false;
   private double targetDistance = 0;
+
+  // SOTM相关状态
+  private Pose2d currentRobotPose = Pose2d.kZero;
+  private ChassisSpeeds currentRobotSpeeds = new ChassisSpeeds();
+  private SOTMCalculator.ShotParams sotmParams = null;
 
   private static final double HOOD_MIN_ANGLE = 20.0; // Hood最小角度
   private static final double HOOD_MAX_ANGLE = 70.0; // Hood最大角度
   private static final double FLYWHEEL_MIN_RPM = 1000.0; // 飞轮最小转速
   private static final double FLYWHEEL_MAX_RPM = 6000.0; // 飞轮最大转速
+
+  // Drive子系统引用（用于获取机器人的位姿和速度）
+  private Drive drive = null;
 
   private void updateInputs() {
     shooterStateInputs.isReady = isReady;
@@ -294,9 +306,93 @@ public class ShooterSubsystem extends SubsystemBase {
     isShooting = shooting;
   }
 
+  /**
+   * 设置Drive子系统引用（用于SOTM计算）
+   *
+   * @param drive Drive子系统实例
+   */
+  public void setDrive(Drive drive) {
+    this.drive = drive;
+  }
+
+  /**
+   * 启用/禁用SOTM模式
+   *
+   * @param enabled 是否启用
+   */
+  public void setSOTMEnabled(boolean enabled) {
+    this.isSOTMEnabled = enabled;
+    if (!enabled) {
+      sotmParams = null;
+    }
+  }
+
+  /**
+   * 获取SOTM是否启用
+   *
+   * @return SOTM是否启用
+   */
+  public boolean isSOTMEnabled() {
+    return isSOTMEnabled;
+  }
+
+  /**
+   * 获取当前SOTM计算结果
+   *
+   * @return SOTM射击参数，如果未启用则返回null
+   */
+  public SOTMCalculator.ShotParams getSOTMParams() {
+    return sotmParams;
+  }
+
+  /**
+   * 执行SOTM瞄准（移动中射击）
+   * 注意：建议使用periodic()中的自动计算，只在需要时调用此方法获取结果
+   *
+   * @return SOTM瞄准命令
+   */
+  public Command aimSOTM() {
+    return run(() -> {
+      if (drive != null && isSOTMEnabled) {
+        // 获取机器人当前位置和速度
+        currentRobotPose = drive.getPose();
+        currentRobotSpeeds = drive.getFieldSpeeds();
+
+        // 计算SOTM参数
+        sotmParams = sotmCalculator.calculate(currentRobotPose, currentRobotSpeeds);
+
+        if (sotmParams != null && sotmParams.isValid()) {
+          // 更新速度供应器
+          flywheelVelocitySupplier = () -> sotmParams.flywheelRpm();
+
+          isReady = true;
+          isAiming = true;
+        }
+      }
+    });
+  }
+
   @Override
   public void periodic() {
+    // 更新输入数据
     updateInputs();
+
+    // 如果启用了SOTM模式，更新计算
+    // 注意：aimSOTM()命令中也可能触发此计算，这是预期行为
+    if (isSOTMEnabled && drive != null) {
+      currentRobotPose = drive.getPose();
+      currentRobotSpeeds = drive.getFieldSpeeds();
+      sotmParams = sotmCalculator.calculate(currentRobotPose, currentRobotSpeeds);
+
+      // 应用SOTM结果到执行器
+      if (sotmParams != null && sotmParams.isValid()) {
+        hood.setAngleDirect(sotmParams.hoodAngle());
+        turret.setAngleDirect(Degrees.of(sotmParams.turretAngle().getDegrees()));
+        flywheel.setVelocityDirect(sotmParams.flywheelRpm());
+      }
+    }
+
+    // 记录日志
     Logger.processInputs("Shooter/State", shooterStateInputs);
   }
 }
