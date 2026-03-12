@@ -112,36 +112,21 @@ public class ShooterSubsystem extends SubsystemBase {
    * @param targetHeight 目标高度
    * @return [hoodAngle, flywheelRPM] 数组
    */
+  /**
+   * 根据距离计算射击参数（Hood角度和飞轮转速） 现在使用SOTMCalculator中的查找表，消除数据重复
+   *
+   * @param distance 目标距离
+   * @param targetHeight 目标高度（当前未使用，为未来扩展保留）
+   * @return [hoodAngle, flywheelRPM] 数组
+   */
   private double[] calculateShotParameters(double distance, double targetHeight) {
-    double hoodAngle;
-    double flywheelRPM;
+    // 使用SOTMCalculator的查找表获取参数
+    SOTMCalculator.ShooterTableEntry entry = sotmCalculator.getShotParametersForDistance(distance);
 
-    if (distance < 2.0) {
-      hoodAngle = 65.0;
-      flywheelRPM = 2000.0;
-    } else if (distance < 3.0) {
-      hoodAngle = 55.0;
-      flywheelRPM = 3000.0;
-    } else if (distance < 4.0) {
-      hoodAngle = 45.0;
-      flywheelRPM = 4000.0;
-    } else if (distance < 5.0) {
-      hoodAngle = 38.0;
-      flywheelRPM = 4800.0;
-    } else if (distance < 6.0) {
-      hoodAngle = 32.0;
-      flywheelRPM = 5200.0;
-    } else if (distance < 7.0) {
-      hoodAngle = 28.0;
-      flywheelRPM = 5500.0;
-    } else if (distance < 8.0) {
-      hoodAngle = 25.0;
-      flywheelRPM = 5700.0;
-    } else {
-      hoodAngle = 22.0;
-      flywheelRPM = 5800.0;
-    }
+    double hoodAngle = entry.hoodAngle().in(Degrees);
+    double flywheelRPM = entry.rpm().in(RPM);
 
+    // 应用边界限制
     hoodAngle = Math.max(HOOD_MIN_ANGLE, Math.min(HOOD_MAX_ANGLE, hoodAngle));
     flywheelRPM = Math.max(FLYWHEEL_MIN_RPM, Math.min(FLYWHEEL_MAX_RPM, flywheelRPM));
 

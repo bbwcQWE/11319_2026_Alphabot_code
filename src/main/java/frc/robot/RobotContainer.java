@@ -106,8 +106,7 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement,
-                new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation),
-                new VisionIOLimelight(VisionConstants.camera1Name, drive::getRotation));
+                new VisionIOLimelight(VisionConstants.camera0Name, drive::getRotation));
 
         // 初始化feeder和intake子系统
         feeder = new FeederSubsystem();
@@ -132,9 +131,7 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVisionSim(
-                    VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose),
-                new VisionIOPhotonVisionSim(
-                    VisionConstants.camera1Name, VisionConstants.robotToCamera1, drive::getPose));
+                    VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose));
 
         // 初始化feeder和intake子系统
         feeder = new FeederSubsystem();

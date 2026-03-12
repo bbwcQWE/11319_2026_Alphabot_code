@@ -365,4 +365,32 @@ public class SOTMCalculator {
     double velocity = distance / timeOfFlight;
     velocityToDistanceMap.put(velocity, distance);
   }
+
+  /**
+   * 根据距离获取射击参数（Hood角度和飞轮转速） 此方法暴露查找表数据供ShooterSubsystem使用，消除数据重复
+   *
+   * @param distance 目标距离（米）
+   * @return ShooterTableEntry包含hoodAngle和rpm，如果距离超出范围返回边界值
+   */
+  public ShooterTableEntry getShotParametersForDistance(double distance) {
+    return getInterpolatedEntry(distance);
+  }
+
+  /**
+   * 获取LUT有效距离范围
+   *
+   * @return 最小距离
+   */
+  public double getMinDistance() {
+    return MIN_DISTANCE;
+  }
+
+  /**
+   * 获取LUT有效距离范围
+   *
+   * @return 最大距离
+   */
+  public double getMaxDistance() {
+    return MAX_DISTANCE;
+  }
 }
