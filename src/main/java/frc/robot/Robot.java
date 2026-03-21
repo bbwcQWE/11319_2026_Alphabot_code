@@ -9,8 +9,10 @@
 package frc.robot;
 
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.util.BatteryLogger;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -22,6 +24,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
+  public static final BatteryLogger batteryLogger = new BatteryLogger();
 
   public Robot() {
     // 记录元数据
@@ -83,6 +86,11 @@ public class Robot extends LoggedRobot {
     // 并运行子系统的periodic()方法。
     // 必须从机器人的periodic块调用此方法，Command-based框架才能正常工作。
     CommandScheduler.getInstance().run();
+
+    // 更新电池Logger
+    batteryLogger.setBatteryVoltage(RobotController.getBatteryVoltage());
+    batteryLogger.setRioCurrent(RobotController.getInputCurrent());
+    batteryLogger.periodicAfterScheduler();
 
     // 更新Field2d Dashboard - 将机器人Pose显示到Elastic Dashboard
     robotContainer.getField2dDashboard().update();
